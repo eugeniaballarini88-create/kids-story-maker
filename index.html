@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story Maker ✨</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --cream: #fdf8f0;
+    --brown: #8b5e3c;
+    --dark: #3d2b1f;
+    --accent: #e8763a;
+    --soft: #c9a87c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; color: var(--dark); }
+
+  #form-screen {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 2rem 1rem;
+  }
+
+  .form-card {
+    background: white; border-radius: 24px; padding: 2.5rem 2rem;
+    width: 100%; max-width: 500px;
+    box-shadow: 0 8px 40px rgba(139,94,60,0.12);
+  }
+
+  .form-header { text-align: center; margin-bottom: 2rem; }
+  .form-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+  .form-title { font-family: 'Lora', serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 0.4rem; }
+  .form-subtitle { color: var(--soft); font-size: 0.9rem; }
+
+  .field { margin-bottom: 1.2rem; }
+  label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); margin-bottom: 0.4rem; }
+  input, select {
+    width: 100%; padding: 0.75rem 1rem; border: 2px solid #ede5d8; border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--dark);
+    background: var(--cream); transition: border-color 0.2s; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--accent); background: white; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+  .generate-btn {
+    width: 100%; padding: 1rem; background: var(--accent); color: white; border: none;
+    border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 16px rgba(232,118,58,0.35);
+  }
+  .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,118,58,0.4); }
+  .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 12px; padding: 1rem; color: #c0392b; font-size: 0.9rem; margin-top: 1rem; display: none; }
+
+  #loading-screen {
+    display: none; min-height: 100vh; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1.5rem;
+  }
+  .loading-book { font-size: 4rem; animation: bounce 1s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .loading-text { font-family: 'Lora', serif; font-size: 1.3rem; color: var(--brown); }
+  .loading-dots::after { content: ''; animation: dots 1.5s infinite; }
+  @keyframes dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
+  .progress-bar-wrap { width: 260px; height: 6px; background: #ede5d8; border-radius: 99px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
+  .progress-label { font-size: 0.8rem; color: var(--soft); }
+
+  #book-screen { display: none; min-height: 100vh; padding: 1.5rem 1rem 3rem; background: var(--cream); }
+
+  .book-topbar { display: flex; justify-content: space-between; align-items: center; max-width: 700px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
+  .back-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: border-color 0.2s; }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pdf-btn { background: var(--accent); border: none; border-radius: 10px; padding: 0.5rem 1.2rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: white; cursor: pointer; transition: opacity 0.2s; }
+  .pdf-btn:hover { opacity: 0.85; }
+  .book-title-bar { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--dark); font-style: italic; text-align: center; flex: 1; }
+
+  .page-container { max-width: 700px; margin: 0 auto; }
+
+  .cover-page { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(139,94,60,0.15); margin-bottom: 1.5rem; position: relative; min-height: 300px; }
+  .cover-image { width: 100%; height: 320px; object-fit: cover; display: block; background: linear-gradient(135deg,#fde8c8,#c8e6f5); }
+  .cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(61,43,31,0.85)); padding: 2.5rem 2rem 2rem; }
+  .cover-title { font-family: 'Lora', serif; font-size: 2rem; color: white; line-height: 1.2; margin-bottom: 0.4rem; }
+  .cover-subtitle { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+
+  .story-page { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(139,94,60,0.1); margin-bottom: 1.2rem; display: grid; grid-template-columns: 220px 1fr; min-height: 200px; opacity: 0; transform: translateY(20px); animation: fadeUp 0.5s forwards; }
+  .story-page:nth-child(even) { grid-template-columns: 1fr 220px; }
+  .story-page:nth-child(even) .page-img { order: 2; }
+  .story-page:nth-child(even) .page-body { order: 1; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .page-img { overflow: hidden; min-height: 200px; background: linear-gradient(135deg,#fde8c8,#d4eef8); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+  .page-img img { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 200px; }
+  .page-body { padding: 1.5rem 1.8rem; display: flex; flex-direction: column; justify-content: center; }
+  .page-num { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--soft); margin-bottom: 0.6rem; }
+  .page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.8; color: var(--dark); }
+
+  .end-page { background: var(--accent); border-radius: 20px; padding: 3rem 2rem; text-align: center; color: white; margin-bottom: 1.5rem; }
+  .end-page h2 { font-family: 'Lora', serif; font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .end-page p { opacity: 0.85; }
+
+  .new-story-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 1rem; background: var(--dark); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
+  .new-story-btn:hover { opacity: 0.85; }
+
+  @media print {
+    .book-topbar { display: none; }
+    .new-story-btn { display: none; }
+    .story-page { break-inside: avoid; box-shadow: none; border: 1px solid #ede5d8; opacity: 1 !important; transform: none !important; }
+    body { background: white; }
+  }
+
+  @media (max-width: 550px) {
+    .story-page, .story-page:nth-child(even) { grid-template-columns: 1fr; }
+    .story-page:nth-child(even) .page-img { order: 1; }
+    .story-page:nth-child(even) .page-body { order: 2; }
+    .cover-image { height: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="form-screen">
+  <div class="form-card">
+    <div class="form-header">
+      <span class="form-emoji">📖</span>
+      <h1 class="form-title">Story Maker</h1>
+      <p class="form-subtitle">Create a magical illustrated book in seconds</p>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Child's Name</label>
+        <input type="text" id="child-name" placeholder="e.g. Emma" />
+      </div>
+      <div class="field">
+        <label>Age</label>
+        <select id="age">
+          <option value="2-3">2–3 years</option>
+          <option value="4-5">4–5 years</option>
+          <option value="6-7" selected>6–7 years</option>
+          <option value="8-10">8–10 years</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Gender</label>
+        <select id="gender">
+          <option value="girl">Girl</option>
+          <option value="boy">Boy</option>
+          <option value="neutral">Neutral</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Language</label>
+        <select id="language">
+          <option value="English">English</option>
+          <option value="French">French</option>
+          <option value="Spanish">Spanish</option>
+          <option value="Italian">Italian</option>
+          <option value="German">German</option>
+          <option value="Portuguese">Portuguese</option>
+          <option value="Arabic">Arabic</option>
+          <option value="Hebrew">Hebrew</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Story Topic / Theme</label>
+      <input type="text" id="topic" placeholder="e.g. a brave bunny who discovers a magical forest" />
+    </div>
+
+    <div class="field">
+      <label>Moral or Lesson (optional)</label>
+      <input type="text" id="moral" placeholder="e.g. kindness, sharing, bravery..." />
+    </div>
+
+    <div class="field">
+      <label>Story Length</label>
+      <select id="pages">
+        <option value="6">6 pages — Quick bedtime story</option>
+        <option value="10" selected>10 pages — Classic storybook</option>
+        <option value="15">15 pages — Full adventure</option>
+      </select>
+    </div>
+
+    <button class="generate-btn" onclick="generateStory()">✨ Create My Story</button>
+    <div class="error-box" id="error-box"></div>
+  </div>
+</div>
+
+<div id="loading-screen">
+  <div class="loading-book">📖</div>
+  <div class="loading-text">Writing your story<span class="loading-dots"></span></div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="progress-label" id="progress-label">Asking Claude for ideas...</div>
+</div>
+
+<div id="book-screen">
+  <div class="book-topbar">
+    <button class="back-btn" onclick="goBack()">← New Story</button>
+    <div class="book-title-bar" id="book-title-bar"></div>
+    <button class="pdf-btn" onclick="window.print()">⬇ Save as PDF</button>
+  </div>
+  <div class="page-container" id="page-container"></div>
+  <button class="new-story-btn" onclick="goBack()">✨ Create Another Story</button>
+</div>
+
+<script>
+const IMG_STYLE = "watercolor illustration, children's book, soft pastel colors, whimsical, warm, gentle brushstrokes, no text, no words";
+const EMOJIS = ['🌟','🌈','🌸','🦋','🌿','⭐','🐣','🍀','🌻','🦄','🐬','🌙','🎈','🦊','🐧'];
+
+function show(id) {
+  ['form-screen','loading-screen','book-screen'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = s === id ? (s === 'book-screen' ? 'block' : 'flex') : 'none';
+  });
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+}
+
+function showError(msg) {
+  const b = document.getElementById('error-box');
+  b.textContent = msg; b.style.display = 'block';
+}
+
+function imgUrl(prompt, seed) {
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=440&height=320&nologo=true&seed=${seed || Math.floor(Math.random()*99999)}`;
+}
+
+async function generateStory() {
+  const name     = document.getElementById('child-name').value.trim() || 'Alex';
+  const age      = document.getElementById('age').value;
+  const gender   = document.getElementById('gender').value;
+  const topic    = document.getElementById('topic').value.trim() || 'a magical adventure in an enchanted forest';
+  const moral    = document.getElementById('moral').value.trim();
+  const language = document.getElementById('language').value;
+  const pages    = document.getElementById('pages').value;
+
+  document.getElementById('error-box').style.display = 'none';
+  document.querySelector('.generate-btn').disabled = true;
+  show('loading-screen');
+  setProgress(10, 'Connecting to server...');
+
+  try {
+    setProgress(30, 'Claude is writing your story...');
+
+    const res = await fetch('/.netlify/functions/story', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, age, gender, topic, moral, language, pages })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+
+    const story = await res.json();
+    if (!story.title || !story.pages?.length) throw new Error('Incomplete story received. Please try again.');
+
+    setProgress(70, 'Story ready! Loading illustrations...');
+
+    const container = document.getElementById('page-container');
+    container.innerHTML = '';
+    document.getElementById('book-title-bar').textContent = story.title;
+
+    // Cover
+    const cover = document.createElement('div');
+    cover.className = 'cover-page';
+    const coverSrc = imgUrl(`book cover, ${story.title}, ${story.pages[0]?.imagePrompt}`, 9999);
+    cover.innerHTML = `
+      <img class="cover-image" src="${coverSrc}" alt="Cover"
+        onerror="this.style.background='linear-gradient(135deg,#fde8c8,#c8e6f5)';this.removeAttribute('src')" />
+      <div class="cover-overlay">
+        <div class="cover-title">${story.title}</div>
+        <div class="cover-subtitle">A story made just for ${name} ✨</div>
+      </div>`;
+    container.appendChild(cover);
+
+    setProgress(85, 'Painting illustrations...');
+
+    story.pages.forEach((page, i) => {
+      const el = document.createElement('div');
+      el.className = 'story-page';
+      el.style.animationDelay = (i * 0.08) + 's';
+
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'page-img';
+      const img = document.createElement('img');
+      img.src = imgUrl(page.imagePrompt, 1000 + i);
+      img.alt = `Page ${i+1}`;
+      img.onerror = function() { this.parentNode.textContent = EMOJIS[i % EMOJIS.length]; };
+      imgDiv.appendChild(img);
+
+      const bodyDiv = document.createElement('div');
+      bodyDiv.className = 'page-body';
+      bodyDiv.innerHTML = `<div class="page-num">Page ${i+1}</div><div class="page-text">${page.text}</div>`;
+
+      el.appendChild(imgDiv);
+      el.appendChild(bodyDiv);
+      container.appendChild(el);
+    });
+
+    const end = document.createElement('div');
+    end.className = 'end-page';
+    end.innerHTML = `<h2>The End 🌟</h2><p>A story made with love for ${name}</p>`;
+    container.appendChild(end);
+
+    setProgress(100, 'Your story is ready!');
+    await new Promise(r => setTimeout(r, 400));
+    show('book-screen');
+    window.scrollTo(0, 0);
+
+  } catch(err) {
+    show('form-screen');
+    document.querySelector('.generate-btn').disabled = false;
+    showError('Oops! ' + (err.message || 'Something went wrong. Please try again.'));
+  }
+}
+
+function goBack() {
+  show('form-screen');
+  document.querySelector('.generate-btn').disabled = false;
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
