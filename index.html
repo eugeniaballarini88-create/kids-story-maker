@@ -18,22 +18,20 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; color: var(--dark); }
 
+  /* FORM */
   #form-screen {
     min-height: 100vh; display: flex; flex-direction: column;
     align-items: center; justify-content: center; padding: 2rem 1rem;
   }
-
   .form-card {
     background: white; border-radius: 24px; padding: 2.5rem 2rem;
     width: 100%; max-width: 500px;
     box-shadow: 0 8px 40px rgba(139,94,60,0.12);
   }
-
   .form-header { text-align: center; margin-bottom: 2rem; }
   .form-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
   .form-title { font-family: 'Lora', serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 0.4rem; }
   .form-subtitle { color: var(--soft); font-size: 0.9rem; }
-
   .field { margin-bottom: 1.2rem; }
   label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); margin-bottom: 0.4rem; }
   input, select {
@@ -43,17 +41,17 @@
   }
   input:focus, select:focus { border-color: var(--accent); background: white; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-
   .generate-btn {
     width: 100%; padding: 1rem; background: var(--accent); color: white; border: none;
     border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800;
     cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
     box-shadow: 0 4px 16px rgba(232,118,58,0.35);
   }
-  .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,118,58,0.4); }
+  .generate-btn:hover { transform: translateY(-2px); }
   .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
   .error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 12px; padding: 1rem; color: #c0392b; font-size: 0.9rem; margin-top: 1rem; display: none; }
 
+  /* LOADING */
   #loading-screen {
     display: none; min-height: 100vh; align-items: center; justify-content: center;
     flex-direction: column; gap: 1.5rem;
@@ -67,62 +65,130 @@
   .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
   .progress-label { font-size: 0.8rem; color: var(--soft); }
 
-  #book-screen { display: none; min-height: 100vh; padding: 1.5rem 1rem 3rem; background: var(--cream); }
+  /* BOOK SCREEN - screen view */
+  #book-screen { display: none; background: #e8e0d8; min-height: 100vh; padding: 2rem 1rem 4rem; }
 
-  .book-topbar { display: flex; justify-content: space-between; align-items: center; max-width: 700px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
-  .back-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: border-color 0.2s; }
+  .book-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 600px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .back-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; }
   .back-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .pdf-btn { background: var(--accent); border: none; border-radius: 10px; padding: 0.5rem 1.2rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: white; cursor: pointer; transition: opacity 0.2s; }
-  .pdf-btn:hover { opacity: 0.85; }
-  .book-title-bar { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--dark); font-style: italic; text-align: center; flex: 1; }
+  .pdf-btn {
+    background: var(--accent); border: none; border-radius: 10px; padding: 0.6rem 1.4rem;
+    font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800; color: white;
+    cursor: pointer; box-shadow: 0 2px 8px rgba(232,118,58,0.35);
+  }
+  .pdf-btn:hover { opacity: 0.9; }
+  .pdf-note { font-size: 0.75rem; color: #888; text-align: center; max-width: 600px; margin: 0 auto 1rem; }
 
-  .page-container { max-width: 700px; margin: 0 auto; }
+  /* BOOK PAGES */
+  .book-pages { max-width: 600px; margin: 0 auto; }
 
-  .cover-page { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(139,94,60,0.15); margin-bottom: 1.5rem; position: relative; min-height: 300px; }
-  .cover-image { width: 100%; height: 320px; object-fit: cover; display: block; background: linear-gradient(135deg,#fde8c8,#c8e6f5); }
-  .cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(61,43,31,0.85)); padding: 2.5rem 2rem 2rem; }
-  .cover-title { font-family: 'Lora', serif; font-size: 2rem; color: white; line-height: 1.2; margin-bottom: 0.4rem; }
-  .cover-subtitle { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
-
-  .story-page { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(139,94,60,0.1); margin-bottom: 1.2rem; display: grid; grid-template-columns: 220px 1fr; min-height: 200px; opacity: 0; transform: translateY(20px); animation: fadeUp 0.5s forwards; }
-  .story-page:nth-child(even) { grid-template-columns: 1fr 220px; }
-  .story-page:nth-child(even) .page-img { order: 2; }
-  .story-page:nth-child(even) .page-body { order: 1; }
-  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-  .page-img { overflow: hidden; min-height: 200px; background: linear-gradient(135deg,#fde8c8,#d4eef8); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
-  .page-img img { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 200px; opacity: 0; transition: opacity 0.5s ease; }
-  .page-img img.loaded { opacity: 1; }
-  .page-img .img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg,#fde8c8,#d4eef8); transition: opacity 0.5s ease; }
-  .page-img .img-placeholder.hidden { opacity: 0; pointer-events: none; }
-  .page-body { padding: 1.5rem 1.8rem; display: flex; flex-direction: column; justify-content: center; }
-  .page-num { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--soft); margin-bottom: 0.6rem; }
-  .page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.8; color: var(--dark); }
-
-  .end-page { background: var(--accent); border-radius: 20px; padding: 3rem 2rem; text-align: center; color: white; margin-bottom: 1.5rem; }
-  .end-page h2 { font-family: 'Lora', serif; font-size: 2.5rem; margin-bottom: 0.5rem; }
-  .end-page p { opacity: 0.85; }
-
-  .new-story-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 1rem; background: var(--dark); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
-  .new-story-btn:hover { opacity: 0.85; }
-
-  @media print {
-    .book-topbar { display: none; }
-    .new-story-btn { display: none; }
-    .story-page { break-inside: avoid; box-shadow: none; border: 1px solid #ede5d8; opacity: 1 !important; transform: none !important; }
-    body { background: white; }
+  /* Each page looks like a physical book page */
+  .book-page {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18), 2px 2px 0 #d4c9bc;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    display: flex;
+    flex-direction: column;
+    position: relative;
   }
 
-  @media (max-width: 550px) {
-    .story-page, .story-page:nth-child(even) { grid-template-columns: 1fr; }
-    .story-page:nth-child(even) .page-img { order: 1; }
-    .story-page:nth-child(even) .page-body { order: 2; }
-    .cover-image { height: 220px; }
+  /* Cover page */
+  .book-page.cover { aspect-ratio: 3/4; }
+  .cover-img-wrap { flex: 1; overflow: hidden; position: relative; }
+  .cover-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover-img-wrap .page-img-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #fde8c8, #c8e6f5);
+    display: flex; align-items: center; justify-content: center; font-size: 4rem;
+  }
+  .cover-text-band {
+    background: var(--dark);
+    padding: 1.5rem 2rem;
+    text-align: center;
+  }
+  .cover-book-title { font-family: 'Lora', serif; font-size: 1.6rem; color: white; line-height: 1.2; margin-bottom: 0.3rem; }
+  .cover-book-sub { color: rgba(255,255,255,0.65); font-size: 0.8rem; }
+
+  /* Story pages */
+  .book-page.story { aspect-ratio: 3/4; }
+  .story-img-wrap { height: 58%; overflow: hidden; position: relative; background: linear-gradient(135deg,#fde8c8,#d4eef8); }
+  .story-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.5s; }
+  .story-img-wrap img.loaded { opacity: 1; }
+  .story-img-wrap .img-placeholder {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg,#fde8c8,#d4eef8);
+    transition: opacity 0.5s;
+  }
+  .story-img-wrap .img-placeholder.hidden { opacity: 0; pointer-events: none; }
+
+  .story-text-band {
+    flex: 1; padding: 1.2rem 1.8rem 1rem;
+    display: flex; flex-direction: column; justify-content: space-between;
+    border-top: 3px solid var(--accent);
+  }
+  .story-page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.75; color: var(--dark); flex: 1; }
+  .story-page-num { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--soft); text-align: right; margin-top: 0.5rem; }
+
+  /* End page */
+  .book-page.end-page {
+    background: var(--accent);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0.5rem;
+  }
+  .end-page h2 { font-family: 'Lora', serif; font-size: 2.5rem; color: white; }
+  .end-page p { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
+
+  .new-story-btn {
+    display: block; width: 100%; max-width: 300px; margin: 0 auto;
+    padding: 1rem; background: var(--dark); color: white; border: none;
+    border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem;
+    font-weight: 800; cursor: pointer; text-align: center;
+  }
+  .new-story-btn:hover { opacity: 0.85; }
+
+  /* PRINT STYLES — this is what the PDF looks like */
+  @media print {
+    @page { size: A4 portrait; margin: 0; }
+
+    body { background: white !important; }
+    #form-screen, #loading-screen { display: none !important; }
+    #book-screen { display: block !important; background: white !important; padding: 0 !important; }
+    .book-topbar { display: none !important; }
+    .pdf-note { display: none !important; }
+    .new-story-btn { display: none !important; }
+    .book-pages { max-width: 100% !important; margin: 0 !important; }
+
+    .book-page {
+      width: 100vw !important;
+      height: 100vh !important;
+      aspect-ratio: unset !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      page-break-after: always !important;
+      break-after: page !important;
+    }
+
+    .story-img-wrap { height: 60% !important; }
+    .story-img-wrap img { opacity: 1 !important; }
+    .story-text-band { padding: 1.5rem 2.5rem !important; }
+    .story-page-text { font-size: 1.1rem !important; }
+    .cover-book-title { font-size: 2rem !important; }
   }
 </style>
 </head>
 <body>
 
+<!-- FORM -->
 <div id="form-screen">
   <div class="form-card">
     <div class="form-header">
@@ -130,7 +196,6 @@
       <h1 class="form-title">Story Maker</h1>
       <p class="form-subtitle">Create a magical illustrated book in seconds</p>
     </div>
-
     <div class="row">
       <div class="field">
         <label>Child's Name</label>
@@ -146,7 +211,6 @@
         </select>
       </div>
     </div>
-
     <div class="row">
       <div class="field">
         <label>Gender</label>
@@ -170,17 +234,14 @@
         </select>
       </div>
     </div>
-
     <div class="field">
       <label>Story Topic / Theme</label>
       <input type="text" id="topic" placeholder="e.g. a brave bunny who discovers a magical forest" />
     </div>
-
     <div class="field">
       <label>Moral or Lesson (optional)</label>
       <input type="text" id="moral" placeholder="e.g. kindness, sharing, bravery..." />
     </div>
-
     <div class="field">
       <label>Story Length</label>
       <select id="pages">
@@ -189,12 +250,12 @@
         <option value="15">15 pages — Full adventure</option>
       </select>
     </div>
-
     <button class="generate-btn" onclick="generateStory()">✨ Create My Story</button>
     <div class="error-box" id="error-box"></div>
   </div>
 </div>
 
+<!-- LOADING -->
 <div id="loading-screen">
   <div class="loading-book">📖</div>
   <div class="loading-text">Writing your story<span class="loading-dots"></span></div>
@@ -202,14 +263,16 @@
   <div class="progress-label" id="progress-label">Asking Claude for ideas...</div>
 </div>
 
+<!-- BOOK -->
 <div id="book-screen">
   <div class="book-topbar">
     <button class="back-btn" onclick="goBack()">← New Story</button>
-    <div class="book-title-bar" id="book-title-bar"></div>
-    <button class="pdf-btn" onclick="window.print()">⬇ Save as PDF</button>
+    <div style="font-family:'Lora',serif;font-style:italic;font-size:1rem;color:var(--dark);flex:1;text-align:center;" id="book-title-bar"></div>
+    <button class="pdf-btn" onclick="printBook()">⬇ Save as PDF</button>
   </div>
-  <div class="page-container" id="page-container"></div>
-  <button class="new-story-btn" onclick="goBack()">✨ Create Another Story</button>
+  <p class="pdf-note">💡 Images load one by one — wait for all to appear before saving as PDF</p>
+  <div class="book-pages" id="page-container"></div>
+  <button class="new-story-btn" onclick="goBack()" style="margin-top:1rem;">✨ Create Another Story</button>
 </div>
 
 <script>
@@ -234,7 +297,11 @@ function showError(msg) {
 }
 
 function imgUrl(prompt, seed) {
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=440&height=320&nologo=true&seed=${seed || Math.floor(Math.random()*99999)}`;
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=800&height=500&nologo=true&seed=${seed || Math.floor(Math.random()*99999)}`;
+}
+
+function printBook() {
+  window.print();
 }
 
 async function generateStory() {
@@ -266,111 +333,121 @@ async function generateStory() {
     }
 
     const story = await res.json();
-    if (!story.title || !story.pages?.length) throw new Error('Incomplete story received. Please try again.');
+    if (!story.title || !story.pages?.length) throw new Error('Incomplete story. Please try again.');
 
-    setProgress(70, 'Story ready! Loading illustrations...');
+    setProgress(70, 'Building your book...');
 
     const container = document.getElementById('page-container');
     container.innerHTML = '';
     document.getElementById('book-title-bar').textContent = story.title;
 
-    // Cover
+    // COVER PAGE
     const cover = document.createElement('div');
-    cover.className = 'cover-page';
-    cover.innerHTML = `
-      <img class="cover-image" id="cover-img" alt="Cover" />
-      <div class="cover-overlay">
-        <div class="cover-title">${story.title}</div>
-        <div class="cover-subtitle">A story made just for ${name} ✨</div>
+    cover.className = 'book-page cover';
+    const coverImgWrap = document.createElement('div');
+    coverImgWrap.className = 'cover-img-wrap';
+    const coverImg = document.createElement('img');
+    coverImg.id = 'cover-img';
+    coverImg.alt = 'Cover';
+    coverImgWrap.appendChild(coverImg);
+    cover.appendChild(coverImgWrap);
+    cover.innerHTML += `
+      <div class="cover-text-band">
+        <div class="cover-book-title">${story.title}</div>
+        <div class="cover-book-sub">A story for ${name} ✨</div>
       </div>`;
+    cover.prepend(coverImgWrap);
     container.appendChild(cover);
 
-    setProgress(85, 'Painting illustrations...');
-
-    // Build page structure first (no images yet)
+    // STORY PAGES
     story.pages.forEach((page, i) => {
-      const el = document.createElement('div');
-      el.className = 'story-page';
-      el.style.animationDelay = (i * 0.08) + 's';
+      const pageEl = document.createElement('div');
+      pageEl.className = 'book-page story';
 
-      const imgDiv = document.createElement('div');
-      imgDiv.className = 'page-img';
-      imgDiv.dataset.prompt = page.imagePrompt;
-      imgDiv.dataset.index = i;
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'story-img-wrap';
+      imgWrap.dataset.prompt = page.imagePrompt;
+      imgWrap.dataset.index = i;
 
       const placeholder = document.createElement('div');
       placeholder.className = 'img-placeholder';
       placeholder.textContent = '🎨';
-      imgDiv.appendChild(placeholder);
 
       const img = document.createElement('img');
-      img.alt = 'Page ' + (i+1);
-      imgDiv.appendChild(img);
+      img.alt = `Page ${i+1}`;
 
-      const bodyDiv = document.createElement('div');
-      bodyDiv.className = 'page-body';
-      bodyDiv.innerHTML = `<div class="page-num">Page ${i+1}</div><div class="page-text">${page.text}</div>`;
+      imgWrap.appendChild(placeholder);
+      imgWrap.appendChild(img);
 
-      el.appendChild(imgDiv);
-      el.appendChild(bodyDiv);
-      container.appendChild(el);
+      const textBand = document.createElement('div');
+      textBand.className = 'story-text-band';
+      textBand.innerHTML = `
+        <div class="story-page-text">${page.text}</div>
+        <div class="story-page-num">Page ${i+1}</div>`;
+
+      pageEl.appendChild(imgWrap);
+      pageEl.appendChild(textBand);
+      container.appendChild(pageEl);
     });
 
+    // END PAGE
     const end = document.createElement('div');
-    end.className = 'end-page';
+    end.className = 'book-page end-page';
     end.innerHTML = `<h2>The End 🌟</h2><p>A story made with love for ${name}</p>`;
     container.appendChild(end);
 
-    setProgress(100, 'Your story is ready!');
+    setProgress(100, 'Your book is ready!');
     await new Promise(r => setTimeout(r, 400));
     show('book-screen');
     window.scrollTo(0, 0);
 
-    // Load ALL images sequentially — cover first, then pages one by one
-    const loadImagesSequentially = async () => {
-      // Cover first
-      const coverImg = document.getElementById('cover-img');
-      if (coverImg) {
-        await new Promise((resolve) => {
-          coverImg.onload = () => resolve();
-          coverImg.onerror = () => {
-            coverImg.style.background = 'linear-gradient(135deg,#fde8c8,#c8e6f5)';
-            resolve();
-          };
-          coverImg.src = imgUrl(`book cover, ${story.title}, ${story.pages[0]?.imagePrompt}`, 9999);
-        });
-        await new Promise(r => setTimeout(r, 1500));
-      }
-      // Then pages one by one
-      const imgDivs = container.querySelectorAll('.page-img');
-      for (let i = 0; i < imgDivs.length; i++) {
-        const div = imgDivs[i];
-        const prompt = div.dataset.prompt;
-        const img = div.querySelector('img');
-        const placeholder = div.querySelector('.img-placeholder');
-        if (!prompt || !img) continue;
-        await new Promise((resolve) => {
-          const seed = 1000 + parseInt(div.dataset.index || i);
-          img.onload = () => {
-            img.classList.add('loaded');
-            if (placeholder) placeholder.classList.add('hidden');
-            resolve();
-          };
-          img.onerror = () => {
-            if (placeholder) placeholder.textContent = EMOJIS[i % EMOJIS.length];
-            resolve();
-          };
-          img.src = imgUrl(prompt, seed);
-        });
-        await new Promise(r => setTimeout(r, 1500));
-      }
-    };
-    loadImagesSequentially();
+    // Load images sequentially
+    loadImagesSequentially(story, name, container);
 
   } catch(err) {
     show('form-screen');
     document.querySelector('.generate-btn').disabled = false;
     showError('Oops! ' + (err.message || 'Something went wrong. Please try again.'));
+  }
+}
+
+async function loadImagesSequentially(story, name, container) {
+  // Cover first
+  const coverImg = document.getElementById('cover-img');
+  if (coverImg) {
+    await new Promise((resolve) => {
+      coverImg.onload = () => resolve();
+      coverImg.onerror = () => {
+        coverImg.parentNode.innerHTML = `<div class="page-img-placeholder">📖</div>`;
+        resolve();
+      };
+      coverImg.src = imgUrl(`children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`, 9999);
+    });
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  // Pages one by one
+  const imgWraps = container.querySelectorAll('.story-img-wrap');
+  for (let i = 0; i < imgWraps.length; i++) {
+    const wrap = imgWraps[i];
+    const prompt = wrap.dataset.prompt;
+    const img = wrap.querySelector('img');
+    const placeholder = wrap.querySelector('.img-placeholder');
+    if (!prompt || !img) continue;
+
+    await new Promise((resolve) => {
+      img.onload = () => {
+        img.classList.add('loaded');
+        if (placeholder) placeholder.classList.add('hidden');
+        resolve();
+      };
+      img.onerror = () => {
+        if (placeholder) placeholder.textContent = EMOJIS[parseInt(wrap.dataset.index) % EMOJIS.length];
+        resolve();
+      };
+      img.src = imgUrl(prompt, 1000 + i);
+    });
+    await new Promise(r => setTimeout(r, 800));
   }
 }
 
