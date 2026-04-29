@@ -289,34 +289,24 @@ async function generateStory() {
 
     setProgress(85, 'Painting illustrations...');
 
+    // Build page structure first (no images yet)
     story.pages.forEach((page, i) => {
       const el = document.createElement('div');
       el.className = 'story-page';
       el.style.animationDelay = (i * 0.08) + 's';
 
-      const imgDiv = document.createElement("div");
-      imgDiv.className = "page-img";
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'page-img';
+      imgDiv.dataset.prompt = page.imagePrompt;
+      imgDiv.dataset.index = i;
 
-      const placeholder = document.createElement("div");
-      placeholder.className = "img-placeholder";
-      placeholder.textContent = "🎨";
-
-      const img = document.createElement("img");
-      img.alt = "Page " + (i+1);
-      let retries = 0;
-      const loadImg = (idx) => {
-        img.src = imgUrl(page.imagePrompt, 1000 + idx * 37);
-      };
-      img.onload = function() {
-        this.classList.add("loaded");
-        placeholder.classList.add("hidden");
-      };
-      img.onerror = function() {
-        if (retries < 3) { retries++; setTimeout(() => loadImg(1000 + i + retries * 99), 2500); }
-        else { placeholder.textContent = EMOJIS[i % EMOJIS.length]; }
-      };
-      loadImg(i);
+      const placeholder = document.createElement('div');
+      placeholder.className = 'img-placeholder';
+      placeholder.textContent = '🎨';
       imgDiv.appendChild(placeholder);
+
+      const img = document.createElement('img');
+      img.alt = 'Page ' + (i+1);
       imgDiv.appendChild(img);
 
       const bodyDiv = document.createElement('div');
@@ -337,6 +327,33 @@ async function generateStory() {
     await new Promise(r => setTimeout(r, 400));
     show('book-screen');
     window.scrollTo(0, 0);
+
+    // Load images sequentially one at a time with 1.5s gap
+    const loadImagesSequentially = async () => {
+      const imgDivs = container.querySelectorAll('.page-img');
+      for (let i = 0; i < imgDivs.length; i++) {
+        const div = imgDivs[i];
+        const prompt = div.dataset.prompt;
+        const img = div.querySelector('img');
+        const placeholder = div.querySelector('.img-placeholder');
+        if (!prompt || !img) continue;
+        await new Promise((resolve) => {
+          const seed = 1000 + parseInt(div.dataset.index || i);
+          img.onload = () => {
+            img.classList.add('loaded');
+            if (placeholder) placeholder.classList.add('hidden');
+            resolve();
+          };
+          img.onerror = () => {
+            if (placeholder) placeholder.textContent = EMOJIS[i % EMOJIS.length];
+            resolve();
+          };
+          img.src = imgUrl(prompt, seed);
+        });
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    };
+    loadImagesSequentially();
 
   } catch(err) {
     show('form-screen');
