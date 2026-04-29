@@ -277,10 +277,8 @@ async function generateStory() {
     // Cover
     const cover = document.createElement('div');
     cover.className = 'cover-page';
-    const coverSrc = imgUrl(`book cover, ${story.title}, ${story.pages[0]?.imagePrompt}`, 9999);
     cover.innerHTML = `
-      <img class="cover-image" src="${coverSrc}" alt="Cover"
-        onerror="this.style.background='linear-gradient(135deg,#fde8c8,#c8e6f5)';this.removeAttribute('src')" />
+      <img class="cover-image" id="cover-img" alt="Cover" />
       <div class="cover-overlay">
         <div class="cover-title">${story.title}</div>
         <div class="cover-subtitle">A story made just for ${name} ✨</div>
@@ -328,8 +326,22 @@ async function generateStory() {
     show('book-screen');
     window.scrollTo(0, 0);
 
-    // Load images sequentially one at a time with 1.5s gap
+    // Load ALL images sequentially — cover first, then pages one by one
     const loadImagesSequentially = async () => {
+      // Cover first
+      const coverImg = document.getElementById('cover-img');
+      if (coverImg) {
+        await new Promise((resolve) => {
+          coverImg.onload = () => resolve();
+          coverImg.onerror = () => {
+            coverImg.style.background = 'linear-gradient(135deg,#fde8c8,#c8e6f5)';
+            resolve();
+          };
+          coverImg.src = imgUrl(`book cover, ${story.title}, ${story.pages[0]?.imagePrompt}`, 9999);
+        });
+        await new Promise(r => setTimeout(r, 1500));
+      }
+      // Then pages one by one
       const imgDivs = container.querySelectorAll('.page-img');
       for (let i = 0; i < imgDivs.length; i++) {
         const div = imgDivs[i];
@@ -370,4 +382,3 @@ function goBack() {
 </script>
 </body>
 </html>
-
