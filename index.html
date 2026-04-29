@@ -19,43 +19,36 @@
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; color: var(--dark); }
 
   /* FORM */
-  #form-screen {
-    min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 2rem 1rem;
-  }
-  .form-card {
-    background: white; border-radius: 24px; padding: 2.5rem 2rem;
-    width: 100%; max-width: 500px;
-    box-shadow: 0 8px 40px rgba(139,94,60,0.12);
-  }
+  #form-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; }
+  .form-card { background: white; border-radius: 24px; padding: 2.5rem 2rem; width: 100%; max-width: 500px; box-shadow: 0 8px 40px rgba(139,94,60,0.12); }
   .form-header { text-align: center; margin-bottom: 2rem; }
   .form-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
   .form-title { font-family: 'Lora', serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 0.4rem; }
   .form-subtitle { color: var(--soft); font-size: 0.9rem; }
   .field { margin-bottom: 1.2rem; }
   label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); margin-bottom: 0.4rem; }
-  input, select {
-    width: 100%; padding: 0.75rem 1rem; border: 2px solid #ede5d8; border-radius: 12px;
-    font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--dark);
-    background: var(--cream); transition: border-color 0.2s; outline: none;
-  }
+  input, select { width: 100%; padding: 0.75rem 1rem; border: 2px solid #ede5d8; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--dark); background: var(--cream); transition: border-color 0.2s; outline: none; }
   input:focus, select:focus { border-color: var(--accent); background: white; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-  .generate-btn {
-    width: 100%; padding: 1rem; background: var(--accent); color: white; border: none;
-    border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800;
-    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 4px 16px rgba(232,118,58,0.35);
-  }
+  .generate-btn { width: 100%; padding: 1rem; background: var(--accent); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 16px rgba(232,118,58,0.35); }
   .generate-btn:hover { transform: translateY(-2px); }
   .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
   .error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 12px; padding: 1rem; color: #c0392b; font-size: 0.9rem; margin-top: 1rem; display: none; }
 
+  /* SAVED STORIES on form screen */
+  .saved-section { width: 100%; max-width: 500px; margin-top: 1.5rem; }
+  .saved-section h3 { font-family: 'Lora', serif; font-size: 1rem; color: var(--brown); margin-bottom: 0.8rem; }
+  .saved-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .saved-item { background: white; border: 2px solid #ede5d8; border-radius: 12px; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: border-color 0.2s; }
+  .saved-item:hover { border-color: var(--accent); }
+  .saved-item-info { flex: 1; }
+  .saved-item-title { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--dark); font-style: italic; }
+  .saved-item-meta { font-size: 0.75rem; color: var(--soft); margin-top: 0.2rem; }
+  .saved-item-delete { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem; border-radius: 6px; }
+  .saved-item-delete:hover { color: #e74c3c; background: #fff0f0; }
+
   /* LOADING */
-  #loading-screen {
-    display: none; min-height: 100vh; align-items: center; justify-content: center;
-    flex-direction: column; gap: 1.5rem;
-  }
+  #loading-screen { display: none; min-height: 100vh; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; }
   .loading-book { font-size: 4rem; animation: bounce 1s ease-in-out infinite; }
   @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
   .loading-text { font-family: 'Lora', serif; font-size: 1.3rem; color: var(--brown); }
@@ -65,124 +58,63 @@
   .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
   .progress-label { font-size: 0.8rem; color: var(--soft); }
 
-  /* BOOK SCREEN - screen view */
+  /* BOOK SCREEN */
   #book-screen { display: none; background: #e8e0d8; min-height: 100vh; padding: 2rem 1rem 4rem; }
-
-  .book-topbar {
-    display: flex; justify-content: space-between; align-items: center;
-    max-width: 600px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 0.5rem;
-  }
+  .book-topbar { display: flex; justify-content: space-between; align-items: center; max-width: 640px; margin: 0 auto 0.8rem; flex-wrap: wrap; gap: 0.5rem; }
   .back-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; }
   .back-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .pdf-btn {
-    background: var(--accent); border: none; border-radius: 10px; padding: 0.6rem 1.4rem;
-    font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800; color: white;
-    cursor: pointer; box-shadow: 0 2px 8px rgba(232,118,58,0.35);
-  }
-  .pdf-btn:hover { opacity: 0.9; }
-  .pdf-note { font-size: 0.75rem; color: #888; text-align: center; max-width: 600px; margin: 0 auto 1rem; }
+  .topbar-right { display: flex; gap: 0.5rem; align-items: center; }
+  .save-btn { background: white; border: 2px solid var(--soft); border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: all 0.2s; }
+  .save-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .save-btn.saved { border-color: #27ae60; color: #27ae60; }
+
+  /* TRANSLATE BAR */
+  .translate-bar { max-width: 640px; margin: 0 auto 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .translate-bar select { padding: 0.5rem 0.8rem; border: 2px solid #ede5d8; border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 0.85rem; background: white; color: var(--dark); outline: none; flex: 1; min-width: 160px; cursor: pointer; }
+  .translate-bar select:focus { border-color: var(--accent); }
+  .translate-btn { background: white; border: 2px solid var(--accent); border-radius: 10px; padding: 0.5rem 1.2rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800; color: var(--accent); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .translate-btn:hover { background: var(--accent); color: white; }
+  .translate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .translate-status { max-width: 640px; margin: -0.5rem auto 0.8rem; font-size: 0.8rem; color: var(--soft); text-align: center; display: none; }
+  .pdf-note { font-size: 0.75rem; color: #999; text-align: center; max-width: 640px; margin: 0 auto 1rem; }
 
   /* BOOK PAGES */
-  .book-pages { max-width: 600px; margin: 0 auto; }
-
-  /* Each page looks like a physical book page */
-  .book-page {
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.18), 2px 2px 0 #d4c9bc;
-    margin-bottom: 2rem;
-    overflow: hidden;
-    aspect-ratio: 3/4;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-
-  /* Cover page */
-  .book-page.cover { aspect-ratio: 3/4; }
-  .cover-img-wrap { flex: 1; overflow: hidden; position: relative; }
+  .book-pages { max-width: 640px; margin: 0 auto; }
+  .book-page { background: white; border-radius: 4px; box-shadow: 0 4px 24px rgba(0,0,0,0.15), 2px 2px 0 #d4c9bc; margin-bottom: 2rem; overflow: hidden; display: flex; flex-direction: column; }
+  .cover-img-wrap { height: 380px; overflow: hidden; position: relative; background: linear-gradient(135deg,#fde8c8,#c8e6f5); }
   .cover-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cover-img-wrap .page-img-placeholder {
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, #fde8c8, #c8e6f5);
-    display: flex; align-items: center; justify-content: center; font-size: 4rem;
-  }
-  .cover-text-band {
-    background: var(--dark);
-    padding: 1.5rem 2rem;
-    text-align: center;
-  }
+  .cover-img-wrap .page-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+  .cover-text-band { background: var(--dark); padding: 1.5rem 2rem; text-align: center; }
   .cover-book-title { font-family: 'Lora', serif; font-size: 1.6rem; color: white; line-height: 1.2; margin-bottom: 0.3rem; }
   .cover-book-sub { color: rgba(255,255,255,0.65); font-size: 0.8rem; }
 
-  /* Story pages */
-  .book-page.story { aspect-ratio: 3/4; }
-  .story-img-wrap { height: 58%; overflow: hidden; position: relative; background: linear-gradient(135deg,#fde8c8,#d4eef8); }
+  .story-page-card { display: grid; grid-template-columns: 220px 1fr; min-height: 200px; }
+  .story-page-card:nth-child(even) { grid-template-columns: 1fr 220px; }
+  .story-page-card:nth-child(even) .story-img-wrap { order: 2; }
+  .story-page-card:nth-child(even) .story-text-band { order: 1; }
+  .story-img-wrap { overflow: hidden; background: linear-gradient(135deg,#fde8c8,#d4eef8); display: flex; align-items: center; justify-content: center; position: relative; min-height: 200px; }
   .story-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.5s; }
   .story-img-wrap img.loaded { opacity: 1; }
-  .story-img-wrap .img-placeholder {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 3rem;
-    background: linear-gradient(135deg,#fde8c8,#d4eef8);
-    transition: opacity 0.5s;
-  }
+  .story-img-wrap .img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background: linear-gradient(135deg,#fde8c8,#d4eef8); transition: opacity 0.5s; }
   .story-img-wrap .img-placeholder.hidden { opacity: 0; pointer-events: none; }
+  .story-text-band { padding: 1.5rem 1.8rem; display: flex; flex-direction: column; justify-content: center; border-left: 3px solid var(--accent); }
+  .story-page-card:nth-child(even) .story-text-band { border-left: none; border-right: 3px solid var(--accent); }
+  .story-page-num { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--soft); margin-bottom: 0.5rem; }
+  .story-page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.78; color: var(--dark); }
 
-  .story-text-band {
-    flex: 1; padding: 1.2rem 1.8rem 1rem;
-    display: flex; flex-direction: column; justify-content: space-between;
-    border-top: 3px solid var(--accent);
-  }
-  .story-page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.75; color: var(--dark); flex: 1; }
-  .story-page-num { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--soft); text-align: right; margin-top: 0.5rem; }
-
-  /* End page */
-  .book-page.end-page {
-    background: var(--accent);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 0.5rem;
-  }
-  .end-page h2 { font-family: 'Lora', serif; font-size: 2.5rem; color: white; }
+  .end-page { background: var(--accent); padding: 3rem 2rem; text-align: center; }
+  .end-page h2 { font-family: 'Lora', serif; font-size: 2.2rem; color: white; margin-bottom: 0.4rem; }
   .end-page p { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
 
-  .new-story-btn {
-    display: block; width: 100%; max-width: 300px; margin: 0 auto;
-    padding: 1rem; background: var(--dark); color: white; border: none;
-    border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem;
-    font-weight: 800; cursor: pointer; text-align: center;
-  }
+  .new-story-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 1rem; background: var(--dark); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
   .new-story-btn:hover { opacity: 0.85; }
 
-  /* PRINT STYLES — this is what the PDF looks like */
-  @media print {
-    @page { size: A4 portrait; margin: 0; }
-
-    body { background: white !important; }
-    #form-screen, #loading-screen { display: none !important; }
-    #book-screen { display: block !important; background: white !important; padding: 0 !important; }
-    .book-topbar { display: none !important; }
-    .pdf-note { display: none !important; }
-    .new-story-btn { display: none !important; }
-    .book-pages { max-width: 100% !important; margin: 0 !important; }
-
-    .book-page {
-      width: 100vw !important;
-      height: 100vh !important;
-      aspect-ratio: unset !important;
-      margin: 0 !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      page-break-after: always !important;
-      break-after: page !important;
-    }
-
-    .story-img-wrap { height: 60% !important; }
-    .story-img-wrap img { opacity: 1 !important; }
-    .story-text-band { padding: 1.5rem 2.5rem !important; }
-    .story-page-text { font-size: 1.1rem !important; }
-    .cover-book-title { font-size: 2rem !important; }
+  @media (max-width: 520px) {
+    .story-page-card, .story-page-card:nth-child(even) { grid-template-columns: 1fr; }
+    .story-page-card:nth-child(even) .story-img-wrap { order: 1; }
+    .story-page-card:nth-child(even) .story-text-band { order: 2; border-right: none; border-left: 3px solid var(--accent); }
+    .story-img-wrap { min-height: 160px; }
+    .cover-img-wrap { height: 240px; }
   }
 </style>
 </head>
@@ -253,6 +185,12 @@
     <button class="generate-btn" onclick="generateStory()">✨ Create My Story</button>
     <div class="error-box" id="error-box"></div>
   </div>
+
+  <!-- SAVED STORIES -->
+  <div class="saved-section" id="saved-section" style="display:none;">
+    <h3>📚 Your Saved Stories</h3>
+    <div class="saved-list" id="saved-list"></div>
+  </div>
 </div>
 
 <!-- LOADING -->
@@ -268,9 +206,29 @@
   <div class="book-topbar">
     <button class="back-btn" onclick="goBack()">← New Story</button>
     <div style="font-family:'Lora',serif;font-style:italic;font-size:1rem;color:var(--dark);flex:1;text-align:center;" id="book-title-bar"></div>
-    <button class="pdf-btn" onclick="printBook()">⬇ Save as PDF</button>
+    <div class="topbar-right">
+      <button class="save-btn" id="save-btn" onclick="saveCurrentStory()">🔖 Save</button>
+    </div>
   </div>
-  <p class="pdf-note">💡 Images load one by one — wait for all to appear before saving as PDF</p>
+
+  <!-- TRANSLATE BAR -->
+  <div class="translate-bar">
+    <select id="translate-lang">
+      <option value="">🌍 Translate to...</option>
+      <option value="Italian">🇮🇹 Italian</option>
+      <option value="English">🇬🇧 English</option>
+      <option value="French">🇫🇷 French</option>
+      <option value="Spanish">🇪🇸 Spanish</option>
+      <option value="German">🇩🇪 German</option>
+      <option value="Portuguese">🇧🇷 Portuguese</option>
+      <option value="Arabic">🇸🇦 Arabic</option>
+      <option value="Hebrew">🇮🇱 Hebrew</option>
+    </select>
+    <button class="translate-btn" id="translate-btn" onclick="translateStory()">✨ Translate</button>
+  </div>
+  <div class="translate-status" id="translate-status"></div>
+  <p class="pdf-note">💡 Images load one by one — wait before saving as PDF</p>
+
   <div class="book-pages" id="page-container"></div>
   <button class="new-story-btn" onclick="goBack()" style="margin-top:1rem;">✨ Create Another Story</button>
 </div>
@@ -278,7 +236,73 @@
 <script>
 const IMG_STYLE = "watercolor illustration, children's book, soft pastel colors, whimsical, warm, gentle brushstrokes, no text, no words";
 const EMOJIS = ['🌟','🌈','🌸','🦋','🌿','⭐','🐣','🍀','🌻','🦄','🐬','🌙','🎈','🦊','🐧'];
+let currentStory = null;
+let currentName = '';
+let currentSavedKey = null;
 
+// ── STORAGE ──────────────────────────────────────────────
+function getSavedStories() {
+  try { return JSON.parse(localStorage.getItem('savedStories') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveStories(list) {
+  localStorage.setItem('savedStories', JSON.stringify(list));
+}
+
+function saveCurrentStory() {
+  if (!currentStory) return;
+  const btn = document.getElementById('save-btn');
+  const list = getSavedStories();
+  const key = currentSavedKey || Date.now().toString();
+  const existing = list.findIndex(s => s.key === key);
+  const entry = { key, title: currentStory.title, name: currentName, savedAt: new Date().toLocaleDateString(), story: currentStory };
+  if (existing >= 0) list[existing] = entry;
+  else list.unshift(entry);
+  saveStories(list);
+  currentSavedKey = key;
+  btn.textContent = '✅ Saved!';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = '🔖 Save'; btn.classList.remove('saved'); }, 2000);
+  renderSavedList();
+}
+
+function deleteSavedStory(key) {
+  const list = getSavedStories().filter(s => s.key !== key);
+  saveStories(list);
+  renderSavedList();
+}
+
+function loadSavedStory(entry) {
+  currentStory = entry.story;
+  currentName = entry.name;
+  currentSavedKey = entry.key;
+  renderBook(entry.story, entry.name, false);
+  show('book-screen');
+}
+
+function renderSavedList() {
+  const list = getSavedStories();
+  const section = document.getElementById('saved-section');
+  const el = document.getElementById('saved-list');
+  if (list.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  el.innerHTML = '';
+  list.forEach(entry => {
+    const item = document.createElement('div');
+    item.className = 'saved-item';
+    item.innerHTML = `
+      <div class="saved-item-info" onclick="loadSavedStory_${entry.key}()">
+        <div class="saved-item-title">${entry.title}</div>
+        <div class="saved-item-meta">For ${entry.name} · Saved ${entry.savedAt}</div>
+      </div>
+      <button class="saved-item-delete" onclick="deleteSavedStory('${entry.key}')">✕</button>`;
+    item.querySelector('.saved-item-info').addEventListener('click', () => loadSavedStory(entry));
+    el.appendChild(item);
+  });
+}
+
+// ── UI HELPERS ────────────────────────────────────────────
 function show(id) {
   ['form-screen','loading-screen','book-screen'].forEach(s => {
     const el = document.getElementById(s);
@@ -300,10 +324,91 @@ function imgUrl(prompt, seed) {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=800&height=500&nologo=true&seed=${seed || Math.floor(Math.random()*99999)}`;
 }
 
-function printBook() {
-  window.print();
+// ── RENDER BOOK ───────────────────────────────────────────
+function renderBook(story, name, loadImages = true) {
+  const container = document.getElementById('page-container');
+  container.innerHTML = '';
+  document.getElementById('book-title-bar').textContent = story.title;
+
+  // Cover
+  const cover = document.createElement('div');
+  cover.className = 'book-page';
+  const coverImgWrap = document.createElement('div');
+  coverImgWrap.className = 'cover-img-wrap';
+  const coverImg = document.createElement('img');
+  coverImg.id = 'cover-img';
+  coverImg.alt = 'Cover';
+  coverImgWrap.appendChild(coverImg);
+  cover.appendChild(coverImgWrap);
+  const coverBand = document.createElement('div');
+  coverBand.className = 'cover-text-band';
+  coverBand.innerHTML = `<div class="cover-book-title">${story.title}</div><div class="cover-book-sub">A story for ${name} ✨</div>`;
+  cover.appendChild(coverBand);
+  container.appendChild(cover);
+
+  // Pages
+  story.pages.forEach((page, i) => {
+    const pageEl = document.createElement('div');
+    pageEl.className = 'book-page story-page-card';
+
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'story-img-wrap';
+    imgWrap.dataset.prompt = page.imagePrompt;
+    imgWrap.dataset.index = i;
+    const placeholder = document.createElement('div');
+    placeholder.className = 'img-placeholder';
+    placeholder.textContent = '🎨';
+    const img = document.createElement('img');
+    img.alt = `Page ${i+1}`;
+    imgWrap.appendChild(placeholder);
+    imgWrap.appendChild(img);
+
+    const textBand = document.createElement('div');
+    textBand.className = 'story-text-band';
+    textBand.innerHTML = `<div class="story-page-num">Page ${i+1}</div><div class="story-page-text">${page.text}</div>`;
+
+    pageEl.appendChild(imgWrap);
+    pageEl.appendChild(textBand);
+    container.appendChild(pageEl);
+  });
+
+  // End
+  const end = document.createElement('div');
+  end.className = 'book-page end-page';
+  end.innerHTML = `<h2>The End 🌟</h2><p>A story made with love for ${name}</p>`;
+  container.appendChild(end);
+
+  if (loadImages) loadImagesSequentially(story, container);
 }
 
+// ── IMAGE LOADING ─────────────────────────────────────────
+async function loadImagesSequentially(story, container) {
+  const coverImg = document.getElementById('cover-img');
+  if (coverImg) {
+    await new Promise(resolve => {
+      coverImg.onload = () => resolve();
+      coverImg.onerror = () => { coverImg.parentNode.innerHTML = '<div class="page-img-placeholder">📖</div>'; resolve(); };
+      coverImg.src = imgUrl(`children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`, 9999);
+    });
+    await new Promise(r => setTimeout(r, 800));
+  }
+  const imgWraps = container.querySelectorAll('.story-img-wrap');
+  for (let i = 0; i < imgWraps.length; i++) {
+    const wrap = imgWraps[i];
+    const prompt = wrap.dataset.prompt;
+    const img = wrap.querySelector('img');
+    const ph = wrap.querySelector('.img-placeholder');
+    if (!prompt || !img) continue;
+    await new Promise(resolve => {
+      img.onload = () => { img.classList.add('loaded'); if (ph) ph.classList.add('hidden'); resolve(); };
+      img.onerror = () => { if (ph) ph.textContent = EMOJIS[parseInt(wrap.dataset.index) % EMOJIS.length]; resolve(); };
+      img.src = imgUrl(prompt, 1000 + i);
+    });
+    await new Promise(r => setTimeout(r, 800));
+  }
+}
+
+// ── GENERATE ──────────────────────────────────────────────
 async function generateStory() {
   const name     = document.getElementById('child-name').value.trim() || 'Alex';
   const age      = document.getElementById('age').value;
@@ -320,89 +425,29 @@ async function generateStory() {
 
   try {
     setProgress(30, 'Claude is writing your story...');
-
     const res = await fetch('/.netlify/functions/story', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, age, gender, topic, moral, language, pages })
     });
-
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || `Server error ${res.status}`);
     }
-
     const story = await res.json();
     if (!story.title || !story.pages?.length) throw new Error('Incomplete story. Please try again.');
 
-    setProgress(70, 'Building your book...');
-
-    const container = document.getElementById('page-container');
-    container.innerHTML = '';
-    document.getElementById('book-title-bar').textContent = story.title;
-
-    // COVER PAGE
-    const cover = document.createElement('div');
-    cover.className = 'book-page cover';
-    const coverImgWrap = document.createElement('div');
-    coverImgWrap.className = 'cover-img-wrap';
-    const coverImg = document.createElement('img');
-    coverImg.id = 'cover-img';
-    coverImg.alt = 'Cover';
-    coverImgWrap.appendChild(coverImg);
-    cover.appendChild(coverImgWrap);
-    cover.innerHTML += `
-      <div class="cover-text-band">
-        <div class="cover-book-title">${story.title}</div>
-        <div class="cover-book-sub">A story for ${name} ✨</div>
-      </div>`;
-    cover.prepend(coverImgWrap);
-    container.appendChild(cover);
-
-    // STORY PAGES
-    story.pages.forEach((page, i) => {
-      const pageEl = document.createElement('div');
-      pageEl.className = 'book-page story';
-
-      const imgWrap = document.createElement('div');
-      imgWrap.className = 'story-img-wrap';
-      imgWrap.dataset.prompt = page.imagePrompt;
-      imgWrap.dataset.index = i;
-
-      const placeholder = document.createElement('div');
-      placeholder.className = 'img-placeholder';
-      placeholder.textContent = '🎨';
-
-      const img = document.createElement('img');
-      img.alt = `Page ${i+1}`;
-
-      imgWrap.appendChild(placeholder);
-      imgWrap.appendChild(img);
-
-      const textBand = document.createElement('div');
-      textBand.className = 'story-text-band';
-      textBand.innerHTML = `
-        <div class="story-page-text">${page.text}</div>
-        <div class="story-page-num">Page ${i+1}</div>`;
-
-      pageEl.appendChild(imgWrap);
-      pageEl.appendChild(textBand);
-      container.appendChild(pageEl);
-    });
-
-    // END PAGE
-    const end = document.createElement('div');
-    end.className = 'book-page end-page';
-    end.innerHTML = `<h2>The End 🌟</h2><p>A story made with love for ${name}</p>`;
-    container.appendChild(end);
-
     setProgress(100, 'Your book is ready!');
+    currentStory = story;
+    currentName = name;
+    currentSavedKey = null;
+    document.getElementById('save-btn').textContent = '🔖 Save';
+    document.getElementById('save-btn').classList.remove('saved');
+
     await new Promise(r => setTimeout(r, 400));
+    renderBook(story, name, true);
     show('book-screen');
     window.scrollTo(0, 0);
-
-    // Load images sequentially
-    loadImagesSequentially(story, name, container);
 
   } catch(err) {
     show('form-screen');
@@ -411,51 +456,61 @@ async function generateStory() {
   }
 }
 
-async function loadImagesSequentially(story, name, container) {
-  // Cover first
-  const coverImg = document.getElementById('cover-img');
-  if (coverImg) {
-    await new Promise((resolve) => {
-      coverImg.onload = () => resolve();
-      coverImg.onerror = () => {
-        coverImg.parentNode.innerHTML = `<div class="page-img-placeholder">📖</div>`;
-        resolve();
-      };
-      coverImg.src = imgUrl(`children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`, 9999);
-    });
-    await new Promise(r => setTimeout(r, 800));
-  }
+// ── TRANSLATE ─────────────────────────────────────────────
+async function translateStory() {
+  const lang = document.getElementById('translate-lang').value;
+  if (!lang) { alert('Please select a language first.'); return; }
+  if (!currentStory) return;
 
-  // Pages one by one
-  const imgWraps = container.querySelectorAll('.story-img-wrap');
-  for (let i = 0; i < imgWraps.length; i++) {
-    const wrap = imgWraps[i];
-    const prompt = wrap.dataset.prompt;
-    const img = wrap.querySelector('img');
-    const placeholder = wrap.querySelector('.img-placeholder');
-    if (!prompt || !img) continue;
+  const btn = document.getElementById('translate-btn');
+  const status = document.getElementById('translate-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Translating...';
+  status.textContent = `Translating into ${lang}...`;
+  status.style.display = 'block';
 
-    await new Promise((resolve) => {
-      img.onload = () => {
-        img.classList.add('loaded');
-        if (placeholder) placeholder.classList.add('hidden');
-        resolve();
-      };
-      img.onerror = () => {
-        if (placeholder) placeholder.textContent = EMOJIS[parseInt(wrap.dataset.index) % EMOJIS.length];
-        resolve();
-      };
-      img.src = imgUrl(prompt, 1000 + i);
+  try {
+    const res = await fetch('/.netlify/functions/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ story: currentStory, targetLanguage: lang })
     });
-    await new Promise(r => setTimeout(r, 800));
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Translation failed.');
+    }
+    const translated = await res.json();
+    if (!translated.title || !translated.pages?.length) throw new Error('Translation incomplete. Please try again.');
+
+    currentStory = translated;
+    document.getElementById('book-title-bar').textContent = translated.title;
+    const coverTitle = document.querySelector('.cover-book-title');
+    if (coverTitle) coverTitle.textContent = translated.title;
+    const pageTexts = document.querySelectorAll('.story-page-text');
+    pageTexts.forEach((el, i) => { if (translated.pages[i]) el.textContent = translated.pages[i].text; });
+
+    status.textContent = `✅ Translated to ${lang}!`;
+    setTimeout(() => { status.style.display = 'none'; }, 3000);
+
+  } catch(err) {
+    status.textContent = '❌ ' + (err.message || 'Translation failed.');
+    setTimeout(() => { status.style.display = 'none'; }, 4000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Translate';
   }
 }
 
+// ── NAVIGATION ────────────────────────────────────────────
 function goBack() {
   show('form-screen');
   document.querySelector('.generate-btn').disabled = false;
   window.scrollTo(0, 0);
+  renderSavedList();
 }
+
+// Init
+renderSavedList();
 </script>
 </body>
 </html>
