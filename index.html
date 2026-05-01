@@ -37,6 +37,15 @@
   .error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 12px; padding: 1rem; color: #c0392b; font-size: 0.9rem; margin-top: 1rem; display: none; line-height: 1.5; }
   .blocked-box { background: #fff8f0; border: 1px solid #f0c8a0; border-radius: 12px; padding: 1rem; color: #8b5e3c; font-size: 0.9rem; margin-top: 1rem; display: none; line-height: 1.5; }
 
+  /* STORY MODE TOGGLE */
+  .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 1.2rem; border: 2px solid #ede5d8; border-radius: 12px; overflow: hidden; }
+  .mode-btn { padding: 0.75rem 0.5rem; border: none; background: var(--cream); font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--soft); cursor: pointer; transition: all 0.2s; text-align: center; line-height: 1.3; }
+  .mode-btn:first-child { border-right: 1px solid #ede5d8; }
+  .mode-btn.active { background: var(--accent); color: white; }
+  .mode-hint { font-size: 0.78rem; color: var(--soft); margin-top: -0.8rem; margin-bottom: 1.2rem; line-height: 1.4; padding: 0 0.2rem; }
+  .field.dimmed label { color: #ccc; }
+  .field.dimmed input { color: #bbb; border-color: #f0ebe3; background: #faf7f3; }
+
   /* LOADING */
   #loading-screen { display: none; min-height: 100vh; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; }
   .loading-book { font-size: 4rem; animation: bounce 1s ease-in-out infinite; }
@@ -109,8 +118,18 @@
       <p class="form-subtitle">A personalised story creation tool for parents of children aged 0–5</p>
     </div>
 
+    <!-- STORY MODE TOGGLE -->
+    <div class="field">
+      <label>Story Style</label>
+      <div class="mode-toggle">
+        <button type="button" class="mode-btn active" id="mode-personal" onclick="setMode('personal')">👤 My child is the hero<br><span style="font-weight:400;font-size:0.75rem;">Uses your child's name</span></button>
+        <button type="button" class="mode-btn" id="mode-fictional" onclick="setMode('fictional')">🐻 A fictional character<br><span style="font-weight:400;font-size:0.75rem;">Animal or fantasy hero</span></button>
+      </div>
+      <p class="mode-hint" id="mode-hint">The story will feature your child as the main character.</p>
+    </div>
+
     <div class="row">
-      <div class="field">
+      <div class="field" id="name-field">
         <label>Child's Name</label>
         <input type="text" id="child-name" placeholder="e.g. Sofia" />
       </div>
@@ -209,6 +228,30 @@ function imgUrl(prompt, seed) {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=800&height=500&nologo=true&seed=${seed || Math.floor(Math.random()*99999)}`;
 }
 
+let storyMode = 'personal';
+
+function setMode(mode) {
+  storyMode = mode;
+  const nameField = document.getElementById('name-field');
+  const hint = document.getElementById('mode-hint');
+  const personalBtn = document.getElementById('mode-personal');
+  const fictionalBtn = document.getElementById('mode-fictional');
+
+  if (mode === 'personal') {
+    personalBtn.classList.add('active');
+    fictionalBtn.classList.remove('active');
+    nameField.classList.remove('dimmed');
+    document.getElementById('child-name').placeholder = 'e.g. Sofia';
+    hint.textContent = 'The story will feature your child as the main character.';
+  } else {
+    fictionalBtn.classList.add('active');
+    personalBtn.classList.remove('active');
+    nameField.classList.add('dimmed');
+    document.getElementById('child-name').placeholder = 'Optional — not used in story';
+    hint.textContent = 'Claude will invent a warm animal or fantasy character. Your child will see themselves in the story without being named.';
+  }
+}
+
 async function generateStory() {
   const name     = document.getElementById('child-name').value.trim() || 'your little one';
   const age      = document.getElementById('age').value;
@@ -235,7 +278,7 @@ async function generateStory() {
     const res = await fetch('/.netlify/functions/story', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, age, gender, topic, moral, pages })
+      body: JSON.stringify({ name, age, gender, topic, moral, pages, mode: storyMode })
     });
 
     if (!res.ok) {
@@ -365,3 +408,5 @@ function goBack() {
 </body>
 </html>
 
+  
+  
