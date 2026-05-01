@@ -153,16 +153,9 @@ STORY STRUCTURE:
 
 Return only valid JSON, no markdown, no explanation.`;
 
-  const userPrompt = `Write a children's storybook for a ${ageLabel} named ${name || 'the child'} (${genderDesc}, pronouns: ${pronouns}).
-Topic: ${topic}.
-${moralLine}
+  const isFictional = body.mode === 'fictional';
 
-Important notes:
-- ${name || 'The child'} is ${genderDesc} — use correct gender references throughout
-- If the topic mentions a baby brother, the baby is a BOY. If baby sister, she is a GIRL. Do not assign a name to the baby unless specified
-- Keep vocabulary and sentence length appropriate for ${ageLabel}
-
-Return ONLY this JSON structure:
+  const jsonStructure = `Return ONLY this JSON structure:
 {
   "title": "Story title",
   "pages": [
@@ -172,8 +165,33 @@ Return ONLY this JSON structure:
     }
   ]
 }
-
 Exactly ${pageCount} pages. Make it warm, magical and deeply reassuring.`;
+
+  const userPrompt = isFictional
+    ? `Write a children's picture book for a ${ageLabel}.
+
+FICTIONAL CHARACTER MODE:
+- Do NOT use the child's real name. Do NOT address the reader directly.
+- Invent a warm loveable animal or fantasy character as the protagonist (e.g. a little bear, a small rabbit, a tiny owl, a gentle fox).
+- The character should be ${genderDesc} and face the same emotional journey described in the topic.
+- The child being read to will recognise themselves in the character without being named directly.
+- Give the animal character a simple warm name (e.g. Pip, Bea, Milo, Luna).
+- If the topic mentions a baby brother, the baby animal is male. If baby sister, female. Do not assign a name to the baby unless specified.
+
+Topic: ${topic}.
+${moralLine}
+
+${jsonStructure}`
+    : `Write a children's storybook for a ${ageLabel} named ${name || 'the child'} (${genderDesc}, pronouns: ${pronouns}).
+Topic: ${topic}.
+${moralLine}
+
+Important notes:
+- ${name || 'The child'} is ${genderDesc} — use correct gender references throughout
+- If the topic mentions a baby brother, the baby is a BOY. If baby sister, she is a GIRL. Do not assign a name to the baby unless specified
+- Keep vocabulary and sentence length appropriate for ${ageLabel}
+
+${jsonStructure}`;
 
   let story;
   try {
