@@ -24,28 +24,18 @@
   .form-header { text-align: center; margin-bottom: 2rem; }
   .form-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
   .form-title { font-family: 'Lora', serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 0.4rem; }
-  .form-subtitle { color: var(--soft); font-size: 0.9rem; }
+  .form-subtitle { color: var(--soft); font-size: 0.85rem; line-height: 1.5; }
   .field { margin-bottom: 1.2rem; }
   label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); margin-bottom: 0.4rem; }
-  input, select { width: 100%; padding: 0.75rem 1rem; border: 2px solid #ede5d8; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--dark); background: var(--cream); transition: border-color 0.2s; outline: none; }
-  input:focus, select:focus { border-color: var(--accent); background: white; }
+  input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 2px solid #ede5d8; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--dark); background: var(--cream); transition: border-color 0.2s; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
+  textarea { resize: none; height: 80px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-  .generate-btn { width: 100%; padding: 1rem; background: var(--accent); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 16px rgba(232,118,58,0.35); }
-  .generate-btn:hover { transform: translateY(-2px); }
+  .generate-btn { width: 100%; padding: 1rem; background: var(--accent); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 16px rgba(232,118,58,0.35); margin-top: 0.5rem; }
+  .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,118,58,0.4); }
   .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-  .error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 12px; padding: 1rem; color: #c0392b; font-size: 0.9rem; margin-top: 1rem; display: none; }
-
-  /* SAVED STORIES on form screen */
-  .saved-section { width: 100%; max-width: 500px; margin-top: 1.5rem; }
-  .saved-section h3 { font-family: 'Lora', serif; font-size: 1rem; color: var(--brown); margin-bottom: 0.8rem; }
-  .saved-list { display: flex; flex-direction: column; gap: 0.5rem; }
-  .saved-item { background: white; border: 2px solid #ede5d8; border-radius: 12px; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: border-color 0.2s; }
-  .saved-item:hover { border-color: var(--accent); }
-  .saved-item-info { flex: 1; }
-  .saved-item-title { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--dark); font-style: italic; }
-  .saved-item-meta { font-size: 0.75rem; color: var(--soft); margin-top: 0.2rem; }
-  .saved-item-delete { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem; border-radius: 6px; }
-  .saved-item-delete:hover { color: #e74c3c; background: #fff0f0; }
+  .error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 12px; padding: 1rem; color: #c0392b; font-size: 0.9rem; margin-top: 1rem; display: none; line-height: 1.5; }
+  .blocked-box { background: #fff8f0; border: 1px solid #f0c8a0; border-radius: 12px; padding: 1rem; color: #8b5e3c; font-size: 0.9rem; margin-top: 1rem; display: none; line-height: 1.5; }
 
   /* LOADING */
   #loading-screen { display: none; min-height: 100vh; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; }
@@ -56,52 +46,42 @@
   @keyframes dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
   .progress-bar-wrap { width: 260px; height: 6px; background: #ede5d8; border-radius: 99px; overflow: hidden; }
   .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
-  .progress-label { font-size: 0.8rem; color: var(--soft); }
+  .progress-label { font-size: 0.8rem; color: var(--soft); text-align: center; }
 
   /* BOOK SCREEN */
   #book-screen { display: none; background: #e8e0d8; min-height: 100vh; padding: 2rem 1rem 4rem; }
-  .book-topbar { display: flex; justify-content: space-between; align-items: center; max-width: 640px; margin: 0 auto 0.8rem; flex-wrap: wrap; gap: 0.5rem; }
-  .back-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; }
+  .book-topbar { display: flex; justify-content: space-between; align-items: center; max-width: 640px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
+  .back-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: border-color 0.2s; }
   .back-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .topbar-right { display: flex; gap: 0.5rem; align-items: center; }
-  .save-btn { background: white; border: 2px solid var(--soft); border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: all 0.2s; }
-  .save-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .save-btn.saved { border-color: #27ae60; color: #27ae60; }
-
-  /* TRANSLATE BAR */
-  .translate-bar { max-width: 640px; margin: 0 auto 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-  .translate-bar select { padding: 0.5rem 0.8rem; border: 2px solid #ede5d8; border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 0.85rem; background: white; color: var(--dark); outline: none; flex: 1; min-width: 160px; cursor: pointer; }
-  .translate-bar select:focus { border-color: var(--accent); }
-  .translate-btn { background: white; border: 2px solid var(--accent); border-radius: 10px; padding: 0.5rem 1.2rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800; color: var(--accent); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .translate-btn:hover { background: var(--accent); color: white; }
-  .translate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .translate-status { max-width: 640px; margin: -0.5rem auto 0.8rem; font-size: 0.8rem; color: var(--soft); text-align: center; display: none; }
+  .book-title-bar { font-family: 'Lora', serif; font-size: 1rem; color: var(--dark); font-style: italic; text-align: center; flex: 1; }
   .pdf-note { font-size: 0.75rem; color: #999; text-align: center; max-width: 640px; margin: 0 auto 1rem; }
 
   /* BOOK PAGES */
   .book-pages { max-width: 640px; margin: 0 auto; }
   .book-page { background: white; border-radius: 4px; box-shadow: 0 4px 24px rgba(0,0,0,0.15), 2px 2px 0 #d4c9bc; margin-bottom: 2rem; overflow: hidden; display: flex; flex-direction: column; }
-  .cover-img-wrap { height: 380px; overflow: hidden; position: relative; background: linear-gradient(135deg,#fde8c8,#c8e6f5); }
+
+  /* Cover */
+  .cover-img-wrap { height: 360px; overflow: hidden; background: linear-gradient(135deg,#fde8c8,#c8e6f5); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
   .cover-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cover-img-wrap .page-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; }
   .cover-text-band { background: var(--dark); padding: 1.5rem 2rem; text-align: center; }
   .cover-book-title { font-family: 'Lora', serif; font-size: 1.6rem; color: white; line-height: 1.2; margin-bottom: 0.3rem; }
   .cover-book-sub { color: rgba(255,255,255,0.65); font-size: 0.8rem; }
 
+  /* Story pages */
   .story-page-card { display: grid; grid-template-columns: 220px 1fr; min-height: 200px; }
   .story-page-card:nth-child(even) { grid-template-columns: 1fr 220px; }
   .story-page-card:nth-child(even) .story-img-wrap { order: 2; }
-  .story-page-card:nth-child(even) .story-text-band { order: 1; }
-  .story-img-wrap { overflow: hidden; background: linear-gradient(135deg,#fde8c8,#d4eef8); display: flex; align-items: center; justify-content: center; position: relative; min-height: 200px; }
-  .story-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.5s; }
+  .story-page-card:nth-child(even) .story-text-band { order: 1; border-left: none; border-right: 3px solid var(--accent); }
+  .story-img-wrap { overflow: hidden; background: linear-gradient(135deg,#fde8c8,#d4eef8); display: flex; align-items: center; justify-content: center; position: relative; min-height: 200px; font-size: 2.5rem; }
+  .story-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.5s; position: absolute; inset: 0; }
   .story-img-wrap img.loaded { opacity: 1; }
   .story-img-wrap .img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background: linear-gradient(135deg,#fde8c8,#d4eef8); transition: opacity 0.5s; }
   .story-img-wrap .img-placeholder.hidden { opacity: 0; pointer-events: none; }
   .story-text-band { padding: 1.5rem 1.8rem; display: flex; flex-direction: column; justify-content: center; border-left: 3px solid var(--accent); }
-  .story-page-card:nth-child(even) .story-text-band { border-left: none; border-right: 3px solid var(--accent); }
   .story-page-num { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--soft); margin-bottom: 0.5rem; }
-  .story-page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.78; color: var(--dark); }
+  .story-page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.8; color: var(--dark); }
 
+  /* End page */
   .end-page { background: var(--accent); padding: 3rem 2rem; text-align: center; }
   .end-page h2 { font-family: 'Lora', serif; font-size: 2.2rem; color: white; margin-bottom: 0.4rem; }
   .end-page p { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
@@ -126,70 +106,55 @@
     <div class="form-header">
       <span class="form-emoji">📖</span>
       <h1 class="form-title">Story Maker</h1>
-      <p class="form-subtitle">Create a magical illustrated book in seconds</p>
+      <p class="form-subtitle">A personalised story creation tool for parents of children aged 0–5</p>
     </div>
+
     <div class="row">
       <div class="field">
         <label>Child's Name</label>
-        <input type="text" id="child-name" placeholder="e.g. Emma" />
+        <input type="text" id="child-name" placeholder="e.g. Sofia" />
       </div>
       <div class="field">
         <label>Age</label>
         <select id="age">
+          <option value="0-1">0–1 year</option>
           <option value="2-3">2–3 years</option>
-          <option value="4-5">4–5 years</option>
-          <option value="6-7" selected>6–7 years</option>
-          <option value="8-10">8–10 years</option>
+          <option value="4-5" selected>4–5 years</option>
         </select>
       </div>
     </div>
-    <div class="row">
-      <div class="field">
-        <label>Gender</label>
-        <select id="gender">
-          <option value="girl">Girl</option>
-          <option value="boy">Boy</option>
-          <option value="neutral">Neutral</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Language</label>
-        <select id="language">
-          <option value="English">English</option>
-          <option value="French">French</option>
-          <option value="Spanish">Spanish</option>
-          <option value="Italian">Italian</option>
-          <option value="German">German</option>
-          <option value="Portuguese">Portuguese</option>
-          <option value="Arabic">Arabic</option>
-          <option value="Hebrew">Hebrew</option>
-        </select>
-      </div>
+
+    <div class="field">
+      <label>Gender</label>
+      <select id="gender">
+        <option value="girl">Girl</option>
+        <option value="boy">Boy</option>
+        <option value="neutral">Prefer not to say</option>
+      </select>
     </div>
+
     <div class="field">
       <label>Story Topic / Theme</label>
-      <input type="text" id="topic" placeholder="e.g. a brave bunny who discovers a magical forest" />
+      <textarea id="topic" placeholder="e.g. welcoming a new baby brother, starting nursery for the first time, feeling worried about moving to a new house..."></textarea>
     </div>
+
     <div class="field">
-      <label>Moral or Lesson (optional)</label>
-      <input type="text" id="moral" placeholder="e.g. kindness, sharing, bravery..." />
+      <label>Moral or Lesson <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <input type="text" id="moral" placeholder="e.g. change can be exciting, it's okay to feel scared" />
     </div>
+
     <div class="field">
       <label>Story Length</label>
       <select id="pages">
         <option value="6">6 pages — Quick bedtime story</option>
-        <option value="10" selected>10 pages — Classic storybook</option>
-        <option value="15">15 pages — Full adventure</option>
+        <option value="8" selected>8 pages — Classic storybook</option>
+        <option value="10">10 pages — Full adventure</option>
       </select>
     </div>
+
     <button class="generate-btn" onclick="generateStory()">✨ Create My Story</button>
     <div class="error-box" id="error-box"></div>
-  </div>
-
-  <!-- SAVED STORIES -->
-  <div class="saved-section" id="saved-section" style="display:none;">
-    <h3>📚 Your Saved Stories</h3>
-    <div class="saved-list" id="saved-list"></div>
+    <div class="blocked-box" id="blocked-box"></div>
   </div>
 </div>
 
@@ -198,111 +163,24 @@
   <div class="loading-book">📖</div>
   <div class="loading-text">Writing your story<span class="loading-dots"></span></div>
   <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
-  <div class="progress-label" id="progress-label">Asking Claude for ideas...</div>
+  <div class="progress-label" id="progress-label">Checking your topic...</div>
 </div>
 
 <!-- BOOK -->
 <div id="book-screen">
   <div class="book-topbar">
     <button class="back-btn" onclick="goBack()">← New Story</button>
-    <div style="font-family:'Lora',serif;font-style:italic;font-size:1rem;color:var(--dark);flex:1;text-align:center;" id="book-title-bar"></div>
-    <div class="topbar-right">
-      <button class="save-btn" id="save-btn" onclick="saveCurrentStory()">🔖 Save</button>
-    </div>
+    <div class="book-title-bar" id="book-title-bar"></div>
   </div>
-
-  <!-- TRANSLATE BAR -->
-  <div class="translate-bar">
-    <select id="translate-lang">
-      <option value="">🌍 Translate to...</option>
-      <option value="Italian">🇮🇹 Italian</option>
-      <option value="English">🇬🇧 English</option>
-      <option value="French">🇫🇷 French</option>
-      <option value="Spanish">🇪🇸 Spanish</option>
-      <option value="German">🇩🇪 German</option>
-      <option value="Portuguese">🇧🇷 Portuguese</option>
-      <option value="Arabic">🇸🇦 Arabic</option>
-      <option value="Hebrew">🇮🇱 Hebrew</option>
-    </select>
-    <button class="translate-btn" id="translate-btn" onclick="translateStory()">✨ Translate</button>
-  </div>
-  <div class="translate-status" id="translate-status"></div>
-  <p class="pdf-note">💡 Images load one by one — wait before saving as PDF</p>
-
+  <p class="pdf-note">💡 Images load one by one — wait for all to appear before saving as PDF</p>
   <div class="book-pages" id="page-container"></div>
   <button class="new-story-btn" onclick="goBack()" style="margin-top:1rem;">✨ Create Another Story</button>
 </div>
 
 <script>
-const IMG_STYLE = "watercolor illustration, children's book, soft pastel colors, whimsical, warm, gentle brushstrokes, no text, no words";
+const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, no text, no words, child-safe";
 const EMOJIS = ['🌟','🌈','🌸','🦋','🌿','⭐','🐣','🍀','🌻','🦄','🐬','🌙','🎈','🦊','🐧'];
-let currentStory = null;
-let currentName = '';
-let currentSavedKey = null;
 
-// ── STORAGE ──────────────────────────────────────────────
-function getSavedStories() {
-  try { return JSON.parse(localStorage.getItem('savedStories') || '[]'); }
-  catch(e) { return []; }
-}
-
-function saveStories(list) {
-  localStorage.setItem('savedStories', JSON.stringify(list));
-}
-
-function saveCurrentStory() {
-  if (!currentStory) return;
-  const btn = document.getElementById('save-btn');
-  const list = getSavedStories();
-  const key = currentSavedKey || Date.now().toString();
-  const existing = list.findIndex(s => s.key === key);
-  const entry = { key, title: currentStory.title, name: currentName, savedAt: new Date().toLocaleDateString(), story: currentStory };
-  if (existing >= 0) list[existing] = entry;
-  else list.unshift(entry);
-  saveStories(list);
-  currentSavedKey = key;
-  btn.textContent = '✅ Saved!';
-  btn.classList.add('saved');
-  setTimeout(() => { btn.textContent = '🔖 Save'; btn.classList.remove('saved'); }, 2000);
-  renderSavedList();
-}
-
-function deleteSavedStory(key) {
-  const list = getSavedStories().filter(s => s.key !== key);
-  saveStories(list);
-  renderSavedList();
-}
-
-function loadSavedStory(entry) {
-  currentStory = entry.story;
-  currentName = entry.name;
-  currentSavedKey = entry.key;
-  renderBook(entry.story, entry.name, false);
-  show('book-screen');
-}
-
-function renderSavedList() {
-  const list = getSavedStories();
-  const section = document.getElementById('saved-section');
-  const el = document.getElementById('saved-list');
-  if (list.length === 0) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  el.innerHTML = '';
-  list.forEach(entry => {
-    const item = document.createElement('div');
-    item.className = 'saved-item';
-    item.innerHTML = `
-      <div class="saved-item-info" onclick="loadSavedStory_${entry.key}()">
-        <div class="saved-item-title">${entry.title}</div>
-        <div class="saved-item-meta">For ${entry.name} · Saved ${entry.savedAt}</div>
-      </div>
-      <button class="saved-item-delete" onclick="deleteSavedStory('${entry.key}')">✕</button>`;
-    item.querySelector('.saved-item-info').addEventListener('click', () => loadSavedStory(entry));
-    el.appendChild(item);
-  });
-}
-
-// ── UI HELPERS ────────────────────────────────────────────
 function show(id) {
   ['form-screen','loading-screen','book-screen'].forEach(s => {
     const el = document.getElementById(s);
@@ -316,82 +194,152 @@ function setProgress(pct, label) {
 }
 
 function showError(msg) {
-  const b = document.getElementById('error-box');
-  b.textContent = msg; b.style.display = 'block';
+  document.getElementById('error-box').textContent = msg;
+  document.getElementById('error-box').style.display = 'block';
+  document.getElementById('blocked-box').style.display = 'none';
+}
+
+function showBlocked(msg) {
+  document.getElementById('blocked-box').innerHTML = '🌟 ' + msg;
+  document.getElementById('blocked-box').style.display = 'block';
+  document.getElementById('error-box').style.display = 'none';
 }
 
 function imgUrl(prompt, seed) {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=800&height=500&nologo=true&seed=${seed || Math.floor(Math.random()*99999)}`;
 }
 
-// ── RENDER BOOK ───────────────────────────────────────────
-function renderBook(story, name, loadImages = true) {
-  const container = document.getElementById('page-container');
-  container.innerHTML = '';
-  document.getElementById('book-title-bar').textContent = story.title;
+async function generateStory() {
+  const name     = document.getElementById('child-name').value.trim() || 'your little one';
+  const age      = document.getElementById('age').value;
+  const gender   = document.getElementById('gender').value;
+  const topic    = document.getElementById('topic').value.trim();
+  const moral    = document.getElementById('moral').value.trim();
+  const pages    = document.getElementById('pages').value;
 
-  // Cover
-  const cover = document.createElement('div');
-  cover.className = 'book-page';
-  const coverImgWrap = document.createElement('div');
-  coverImgWrap.className = 'cover-img-wrap';
-  const coverImg = document.createElement('img');
-  coverImg.id = 'cover-img';
-  coverImg.alt = 'Cover';
-  coverImgWrap.appendChild(coverImg);
-  cover.appendChild(coverImgWrap);
-  const coverBand = document.createElement('div');
-  coverBand.className = 'cover-text-band';
-  coverBand.innerHTML = `<div class="cover-book-title">${story.title}</div><div class="cover-book-sub">A story for ${name} ✨</div>`;
-  cover.appendChild(coverBand);
-  container.appendChild(cover);
+  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('blocked-box').style.display = 'none';
 
-  // Pages
-  story.pages.forEach((page, i) => {
-    const pageEl = document.createElement('div');
-    pageEl.className = 'book-page story-page-card';
+  if (!topic) {
+    showError('Please enter a story topic or theme before continuing.');
+    return;
+  }
 
-    const imgWrap = document.createElement('div');
-    imgWrap.className = 'story-img-wrap';
-    imgWrap.dataset.prompt = page.imagePrompt;
-    imgWrap.dataset.index = i;
-    const placeholder = document.createElement('div');
-    placeholder.className = 'img-placeholder';
-    placeholder.textContent = '🎨';
-    const img = document.createElement('img');
-    img.alt = `Page ${i+1}`;
-    imgWrap.appendChild(placeholder);
-    imgWrap.appendChild(img);
+  document.querySelector('.generate-btn').disabled = true;
+  show('loading-screen');
+  setProgress(10, 'Checking your topic...');
 
-    const textBand = document.createElement('div');
-    textBand.className = 'story-text-band';
-    textBand.innerHTML = `<div class="story-page-num">Page ${i+1}</div><div class="story-page-text">${page.text}</div>`;
+  try {
+    setProgress(30, 'Writing your story...');
 
-    pageEl.appendChild(imgWrap);
-    pageEl.appendChild(textBand);
-    container.appendChild(pageEl);
-  });
+    const res = await fetch('/.netlify/functions/story', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, age, gender, topic, moral, pages })
+    });
 
-  // End
-  const end = document.createElement('div');
-  end.className = 'book-page end-page';
-  end.innerHTML = `<h2>The End 🌟</h2><p>A story made with love for ${name}</p>`;
-  container.appendChild(end);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
 
-  if (loadImages) loadImagesSequentially(story, container);
+    const data = await res.json();
+
+    // Handle blocked topics
+    if (data.blocked) {
+      show('form-screen');
+      document.querySelector('.generate-btn').disabled = false;
+      showBlocked(data.reason);
+      return;
+    }
+
+    const story = data;
+    if (!story.title || !story.pages?.length) throw new Error('Incomplete story received. Please try again.');
+
+    setProgress(80, 'Building your book...');
+
+    const container = document.getElementById('page-container');
+    container.innerHTML = '';
+    document.getElementById('book-title-bar').textContent = story.title;
+
+    // Cover
+    const cover = document.createElement('div');
+    cover.className = 'book-page';
+    const coverImgWrap = document.createElement('div');
+    coverImgWrap.className = 'cover-img-wrap';
+    coverImgWrap.textContent = '📖';
+    const coverImg = document.createElement('img');
+    coverImg.id = 'cover-img';
+    coverImg.alt = 'Cover';
+    coverImgWrap.appendChild(coverImg);
+    const coverBand = document.createElement('div');
+    coverBand.className = 'cover-text-band';
+    coverBand.innerHTML = `<div class="cover-book-title">${story.title}</div><div class="cover-book-sub">A story for ${name} ✨</div>`;
+    cover.appendChild(coverImgWrap);
+    cover.appendChild(coverBand);
+    container.appendChild(cover);
+
+    // Pages
+    story.pages.forEach((page, i) => {
+      const pageEl = document.createElement('div');
+      pageEl.className = 'book-page story-page-card';
+
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'story-img-wrap';
+      imgWrap.dataset.prompt = page.imagePrompt;
+      imgWrap.dataset.index = i;
+      const placeholder = document.createElement('div');
+      placeholder.className = 'img-placeholder';
+      placeholder.textContent = '🎨';
+      const img = document.createElement('img');
+      img.alt = `Page ${i+1}`;
+      imgWrap.appendChild(placeholder);
+      imgWrap.appendChild(img);
+
+      const textBand = document.createElement('div');
+      textBand.className = 'story-text-band';
+      textBand.innerHTML = `<div class="story-page-num">Page ${i+1}</div><div class="story-page-text">${page.text}</div>`;
+
+      pageEl.appendChild(imgWrap);
+      pageEl.appendChild(textBand);
+      container.appendChild(pageEl);
+    });
+
+    // End page
+    const end = document.createElement('div');
+    end.className = 'book-page end-page';
+    end.innerHTML = `<h2>The End 🌟</h2><p>A story made with love for ${name}</p>`;
+    container.appendChild(end);
+
+    setProgress(100, 'Your story is ready!');
+    await new Promise(r => setTimeout(r, 400));
+    show('book-screen');
+    window.scrollTo(0, 0);
+
+    loadImagesSequentially(story, container);
+
+  } catch(err) {
+    show('form-screen');
+    document.querySelector('.generate-btn').disabled = false;
+    showError('Something went wrong. Please try again.');
+    console.error(err);
+  }
 }
 
-// ── IMAGE LOADING ─────────────────────────────────────────
 async function loadImagesSequentially(story, container) {
+  // Cover first
   const coverImg = document.getElementById('cover-img');
+  const coverWrap = coverImg?.parentNode;
   if (coverImg) {
     await new Promise(resolve => {
-      coverImg.onload = () => resolve();
-      coverImg.onerror = () => { coverImg.parentNode.innerHTML = '<div class="page-img-placeholder">📖</div>'; resolve(); };
-      coverImg.src = imgUrl(`children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`, 9999);
+      coverImg.onload = () => { coverImg.classList.add('loaded'); if(coverWrap) coverWrap.textContent = ''; coverWrap.appendChild(coverImg); resolve(); };
+      coverImg.onerror = () => resolve();
+      coverImg.src = imgUrl(`children's book cover, ${story.title}, ${story.pages[0]?.imagePrompt}`, 9999);
     });
     await new Promise(r => setTimeout(r, 800));
   }
+
+  // Pages one by one
   const imgWraps = container.querySelectorAll('.story-img-wrap');
   for (let i = 0; i < imgWraps.length; i++) {
     const wrap = imgWraps[i];
@@ -408,109 +356,12 @@ async function loadImagesSequentially(story, container) {
   }
 }
 
-// ── GENERATE ──────────────────────────────────────────────
-async function generateStory() {
-  const name     = document.getElementById('child-name').value.trim() || 'Alex';
-  const age      = document.getElementById('age').value;
-  const gender   = document.getElementById('gender').value;
-  const topic    = document.getElementById('topic').value.trim() || 'a magical adventure in an enchanted forest';
-  const moral    = document.getElementById('moral').value.trim();
-  const language = document.getElementById('language').value;
-  const pages    = document.getElementById('pages').value;
-
-  document.getElementById('error-box').style.display = 'none';
-  document.querySelector('.generate-btn').disabled = true;
-  show('loading-screen');
-  setProgress(10, 'Connecting to server...');
-
-  try {
-    setProgress(30, 'Claude is writing your story...');
-    const res = await fetch('/.netlify/functions/story', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, age, gender, topic, moral, language, pages })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Server error ${res.status}`);
-    }
-    const story = await res.json();
-    if (!story.title || !story.pages?.length) throw new Error('Incomplete story. Please try again.');
-
-    setProgress(100, 'Your book is ready!');
-    currentStory = story;
-    currentName = name;
-    currentSavedKey = null;
-    document.getElementById('save-btn').textContent = '🔖 Save';
-    document.getElementById('save-btn').classList.remove('saved');
-
-    await new Promise(r => setTimeout(r, 400));
-    renderBook(story, name, true);
-    show('book-screen');
-    window.scrollTo(0, 0);
-
-  } catch(err) {
-    show('form-screen');
-    document.querySelector('.generate-btn').disabled = false;
-    showError('Oops! ' + (err.message || 'Something went wrong. Please try again.'));
-  }
-}
-
-// ── TRANSLATE ─────────────────────────────────────────────
-async function translateStory() {
-  const lang = document.getElementById('translate-lang').value;
-  if (!lang) { alert('Please select a language first.'); return; }
-  if (!currentStory) return;
-
-  const btn = document.getElementById('translate-btn');
-  const status = document.getElementById('translate-status');
-  btn.disabled = true;
-  btn.textContent = '⏳ Translating...';
-  status.textContent = `Translating into ${lang}...`;
-  status.style.display = 'block';
-
-  try {
-    const res = await fetch('/.netlify/functions/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ story: currentStory, targetLanguage: lang })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Translation failed.');
-    }
-    const translated = await res.json();
-    if (!translated.title || !translated.pages?.length) throw new Error('Translation incomplete. Please try again.');
-
-    currentStory = translated;
-    document.getElementById('book-title-bar').textContent = translated.title;
-    const coverTitle = document.querySelector('.cover-book-title');
-    if (coverTitle) coverTitle.textContent = translated.title;
-    const pageTexts = document.querySelectorAll('.story-page-text');
-    pageTexts.forEach((el, i) => { if (translated.pages[i]) el.textContent = translated.pages[i].text; });
-
-    status.textContent = `✅ Translated to ${lang}!`;
-    setTimeout(() => { status.style.display = 'none'; }, 3000);
-
-  } catch(err) {
-    status.textContent = '❌ ' + (err.message || 'Translation failed.');
-    setTimeout(() => { status.style.display = 'none'; }, 4000);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '✨ Translate';
-  }
-}
-
-// ── NAVIGATION ────────────────────────────────────────────
 function goBack() {
   show('form-screen');
   document.querySelector('.generate-btn').disabled = false;
   window.scrollTo(0, 0);
-  renderSavedList();
 }
-
-// Init
-renderSavedList();
 </script>
 </body>
 </html>
+
