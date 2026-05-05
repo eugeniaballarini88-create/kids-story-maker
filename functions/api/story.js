@@ -186,16 +186,33 @@ Story: ${JSON.stringify(story)}`;
             prompt: `${prompt}, ${IMG_STYLE}`,
             num_steps: 4,
           });
-          // flux-1-schnell returns a ReadableStream
+
+          console.log('AI response type:', typeof response);
+          console.log('AI response keys:', response ? Object.keys(response) : 'null');
+          console.log('Is ReadableStream:', response instanceof ReadableStream);
+
+          // Try {image: base64string} format first
+          if (response?.image) {
+            console.log('Got image property, length:', response.image.length);
+            return `data:image/jpeg;base64,${response.image}`;
+          }
+
+          // Try ReadableStream
           if (response instanceof ReadableStream) {
+            console.log('Got ReadableStream');
             const reader = response.getReader();
             const chunks = [];
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
-              chunks.push(value);
+              if (value) chunks.push(value);
+            }
+            if (chunks.length === 0) {
+              console.log('ReadableStream was empty');
+              return null;
             }
             const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+            console.log('Total bytes:', totalLength);
             const combined = new Uint8Array(totalLength);
             let offset = 0;
             for (const chunk of chunks) {
@@ -205,13 +222,11 @@ Story: ${JSON.stringify(story)}`;
             const base64 = btoa(String.fromCharCode(...combined));
             return `data:image/jpeg;base64,${base64}`;
           }
-          // Some versions return {image: base64string}
-          if (response?.image) {
-            return `data:image/jpeg;base64,${response.image}`;
-          }
+
+          console.log('Unknown response format:', JSON.stringify(response)?.slice(0, 200));
           return null;
         } catch(err) {
-          console.error('Workers AI image error:', err.message);
+          console.error('Workers AI image error:', err.message, err.stack);
           return null;
         }
       };
@@ -232,5 +247,3 @@ Story: ${JSON.stringify(story)}`;
 
   return Response.json(story);
 }
-
-     
