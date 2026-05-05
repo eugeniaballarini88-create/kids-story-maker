@@ -105,7 +105,6 @@ Child age: "${age || ''}"`;
 
 CONTENT RULES — HARD BLOCKS (never include any of these):
 - No violence, harm, or threat of any kind
-- No death by violence, accident, or illness described in detail
 - No scary, dark, or disturbing content
 - No adult concepts — alcohol, drugs, weapons, war, politics, religion
 - No negative body image or harmful gender stereotypes
@@ -113,51 +112,32 @@ CONTENT RULES — HARD BLOCKS (never include any of these):
 - No cliffhangers
 - No strangers presented as threatening
 - No bullying presented as funny or acceptable
-- No graphic descriptions of illness or medical procedures
-- No disturbing transformations or reality-distorting content
 
 EMOTIONAL RULES:
-- Difficult emotions (worry, sadness, jealousy, anger) are allowed but MUST be named simply and clearly
+- Difficult emotions must be named simply and clearly
 - Every difficult emotion must be gently resolved within the story
-- A trusted adult (parent, grandparent, caregiver) must be present and actively supportive
-- The child in the story must always feel safe and loved
+- A trusted adult must be present and actively supportive
 - The story must end warmly, hopefully, and reassuringly
 
 LANGUAGE RULES:
-- Use only simple, concrete vocabulary appropriate for ${ageLabel}
-- Write sentences that feel natural when read aloud by a parent
-- No complex metaphors or abstract concepts
-- Emotions must be named explicitly
+- Simple, concrete vocabulary appropriate for ${ageLabel}
+- Short sentences natural when read aloud
+- Emotions named explicitly
 
-STORY STRUCTURE:
-- Clear beginning, middle and end
-- The child character grows or learns something by the end
-- The moral must be embedded naturally — never preachy
-- Every page must flow naturally into the next
+Return only valid JSON, no markdown.`;
 
-Return only valid JSON, no markdown, no explanation.`;
-
-  const jsonStructure = `Return ONLY this JSON structure, no markdown:
-{"title":"Story title","pages":[{"text":"Page text in English (appropriate length for ${ageLabel})","imagePrompt":"Vivid specific scene for a watercolor children's book illustrator. Describe characters, setting, mood, colors. Child-safe. No text in image."}]}
-Exactly ${pageCount} pages. Make it warm, magical and deeply reassuring.`;
+  const jsonStructure = `Return ONLY this JSON, no markdown:
+{"title":"Story title","pages":[{"text":"Page text (appropriate for ${ageLabel})","imagePrompt":"Vivid watercolor children's book scene. Describe characters, setting, mood, colors. Child-safe. No text in image."}]}
+Exactly ${pageCount} pages. Warm, magical, deeply reassuring.`;
 
   const userPrompt = isFictional
     ? `Write a children's picture book for a ${ageLabel}.
-
-FICTIONAL CHARACTER MODE:
-- Do NOT use the child's real name. Do NOT address the reader directly.
-- Invent a warm loveable animal or fantasy character as the protagonist.
-- The character should be ${genderDesc} and face the same emotional journey described in the topic.
-- Give the animal character a simple warm name (e.g. Pip, Bea, Milo, Luna).
-- If the topic mentions a baby brother, the baby animal is male. If baby sister, female. Do not assign a name to the baby unless specified.
-
-Topic: ${topic}.
-${moralLine}
+FICTIONAL CHARACTER MODE: Invent a warm animal character (${genderDesc}). Give them a simple name (Pip, Bea, Milo, Luna). Do NOT use the child's real name.
+Topic: ${topic}. ${moralLine}
 ${jsonStructure}`
-    : `Write a children's storybook for a ${ageLabel} named ${name || 'the child'} (${genderDesc}, pronouns: ${pronouns}).
-Topic: ${topic}.
-${moralLine}
-Important: ${name || 'The child'} is ${genderDesc}. If topic mentions baby brother, baby is BOY. If baby sister, GIRL. Do not assign baby a name unless specified.
+    : `Write a children's storybook for ${name || 'the child'} (${ageLabel}, ${genderDesc}, pronouns: ${pronouns}).
+Topic: ${topic}. ${moralLine}
+${name || 'The child'} is ${genderDesc}. Baby brother = BOY, baby sister = GIRL. No name for baby unless specified.
 ${jsonStructure}`;
 
   let story;
@@ -166,7 +146,7 @@ ${jsonStructure}`;
     try { story = JSON.parse(storyText.replace(/```json|```/g, '').trim()); }
     catch(e) { return Response.json({ error: 'Could not read the story. Please try again.' }, { status: 500 }); }
     if (!story.title || !story.pages?.length) {
-      return Response.json({ error: 'Incomplete story received. Please try again.' }, { status: 500 });
+      return Response.json({ error: 'Incomplete story. Please try again.' }, { status: 500 });
     }
   } catch(err) {
     return Response.json({ error: err.message || 'Story generation failed.' }, { status: 500 });
@@ -174,27 +154,13 @@ ${jsonStructure}`;
 
   // ── LAYER 3: STORY REVIEW ─────────────────────────────────────────────────
   try {
-    const reviewPrompt = `You are a content reviewer for a children's story app for children aged 0-5.
-
-FAIL if the story contains ANY of:
-- Violence, harm, or threat of any kind
-- Dark, scary, or disturbing content
-- Adult concepts (alcohol, drugs, weapons, war, politics, religion)
-- Negative body image or harmful gender stereotypes
-- Unresolved fear or tension
-- Graphic illness descriptions
-- Bullying presented as acceptable
-- Content inappropriate for children aged 0-5
-- Baby or sibling assigned a random name not provided by the parent
-
-PASS if the story is warm, gentle, age-appropriate, resolves difficult emotions positively, has a trusted adult present, and ends reassuringly.
-
-Respond with ONLY valid JSON:
-{"approved": true} or {"approved": false, "reason": "brief note"}
-
+    const reviewPrompt = `Review this children's story for children aged 0-5.
+FAIL if: violence, dark content, adult concepts, unresolved fear, harmful stereotypes, baby given random name.
+PASS if: warm, gentle, age-appropriate, emotions resolved, trusted adult present, reassuring ending.
+Respond ONLY: {"approved": true} or {"approved": false}
 Story: ${JSON.stringify(story)}`;
 
-    const reviewText = await callClaude('claude-haiku-4-5-20251001', [{ role: 'user', content: reviewPrompt }], null, 200);
+    const reviewText = await callClaude('claude-haiku-4-5-20251001', [{ role: 'user', content: reviewPrompt }], null, 100);
     let review;
     try { review = JSON.parse(reviewText.replace(/```json|```/g, '').trim()); }
     catch(e) { review = { approved: true }; }
@@ -209,9 +175,41 @@ Story: ${JSON.stringify(story)}`;
     console.error('Review error:', err.message);
   }
 
-  // No images for now — returning story text only
+  // ── GENERATE IMAGES WITH CLOUDFLARE WORKERS AI ────────────────────────────
+  if (env.AI) {
+    try {
+      const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text";
+
+      const generateImage = async (prompt) => {
+        try {
+          const response = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+            prompt: `${prompt}, ${IMG_STYLE}`,
+            num_steps: 4,
+          });
+          if (response?.image) {
+            return `data:image/jpeg;base64,${response.image}`;
+          }
+          return null;
+        } catch(err) {
+          console.error('Workers AI image error:', err.message);
+          return null;
+        }
+      };
+
+      // Generate cover image
+      const coverPrompt = `children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`;
+      story.coverImage = await generateImage(coverPrompt);
+
+      // Generate page images sequentially
+      for (let i = 0; i < story.pages.length; i++) {
+        story.pages[i].image = await generateImage(story.pages[i].imagePrompt);
+      }
+
+    } catch(err) {
+      console.error('Image generation error:', err.message);
+    }
+  }
+
   return Response.json(story);
 }
-
-
 
