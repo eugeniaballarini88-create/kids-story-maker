@@ -4,8 +4,6 @@ exports.handler = async function(event, context) {
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  const geminiKey = process.env.GEMINI_API_KEY;
-
   if (!apiKey) {
     return { statusCode: 500, body: JSON.stringify({ error: 'API key not configured on server.' }) };
   }
@@ -37,34 +35,6 @@ exports.handler = async function(event, context) {
     return data?.content?.[0]?.text || '';
   };
 
-  // Gemini image generation helper
-  const generateImage = async (prompt) => {
-    if (!geminiKey) return null;
-    try {
-      const fullPrompt = `${prompt}, watercolor illustration style, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words`;
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${geminiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: fullPrompt }] }],
-            generationConfig: { responseModalities: ['IMAGE', 'TEXT'] }
-          })
-        }
-      );
-      const data = await res.json();
-      const parts = data?.candidates?.[0]?.content?.parts || [];
-      const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
-      if (imagePart?.inlineData?.data) {
-        return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
-      }
-      return null;
-    } catch(err) {
-      console.error('Image generation error:', err.message);
-      return null;
-    }
-  };
 
   // ── LAYER 1: TOPIC PRE-SCREENING (Haiku) ─────────────────────────────────
   try {
@@ -267,23 +237,39 @@ Story: ${JSON.stringify(story)}`;
     console.error('Review error:', err.message);
   }
 
-  // ── GENERATE IMAGES IN PARALLEL (Gemini) ──────────────────────────────────
-  if (geminiKey) {
+  // ── GENERATE IMAGES IN PARALLEL (Pollinations) ──────────────────────────
+  const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words";
+
+  const fetchImage = async (prompt, seed) => {
     try {
-      const coverPrompt = `children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`;
-      const allPrompts = [coverPrompt, ...story.pages.map(p => p.imagePrompt)];
-
-      const imageResults = await Promise.all(allPrompts.map(prompt => generateImage(prompt)));
-
-      story.coverImage = imageResults[0] || null;
-      story.pages = story.pages.map((page, i) => ({
-        ...page,
-        image: imageResults[i + 1] || null
-      }));
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=800&height=500&nologo=true&seed=${seed}`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const buffer = await res.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+      return `data:image/jpeg;base64,${base64}`;
     } catch(err) {
-      console.error('Parallel image generation error:', err.message);
-      // Continue without images rather than failing
+      console.error('Image fetch error:', err.message);
+      return null;
     }
+  };
+
+  try {
+    const coverPrompt = `children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`;
+    const allPrompts = [coverPrompt, ...story.pages.map(p => p.imagePrompt)];
+    const seeds = allPrompts.map((_, i) => 9999 - i * 37);
+
+    const imageResults = await Promise.all(
+      allPrompts.map((prompt, i) => fetchImage(prompt, seeds[i]))
+    );
+
+    story.coverImage = imageResults[0] || null;
+    story.pages = story.pages.map((page, i) => ({
+      ...page,
+      image: imageResults[i + 1] || null
+    }));
+  } catch(err) {
+    console.error('Parallel image generation error:', err.message);
   }
 
   // ── RETURN STORY WITH IMAGES ──────────────────────────────────────────────
