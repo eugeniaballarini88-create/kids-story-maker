@@ -191,13 +191,12 @@
     <button class="back-btn" onclick="goBack()">← New Story</button>
     <div class="book-title-bar" id="book-title-bar"></div>
   </div>
-  <p class="pdf-note">💡 Images load one by one — wait for all to appear before saving as PDF</p>
+  <p class="pdf-note">💡 Your story is generating with illustrations — this may take up to 30 seconds</p>
   <div class="book-pages" id="page-container"></div>
   <button class="new-story-btn" onclick="goBack()" style="margin-top:1rem;">✨ Create Another Story</button>
 </div>
 
 <script>
-const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, no text, no words, child-safe";
 const EMOJIS = ['🌟','🌈','🌸','🦋','🌿','⭐','🐣','🍀','🌻','🦄','🐬','🌙','🎈','🦊','🐧'];
 
 function show(id) {
@@ -224,9 +223,7 @@ function showBlocked(msg) {
   document.getElementById('error-box').style.display = 'none';
 }
 
-function imgUrl(prompt, seed) {
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=800&height=500&nologo=true&seed=${seed || Math.floor(Math.random()*99999)}`;
-}
+
 
 let storyMode = 'personal';
 
@@ -310,11 +307,16 @@ async function generateStory() {
     cover.className = 'book-page';
     const coverImgWrap = document.createElement('div');
     coverImgWrap.className = 'cover-img-wrap';
-    coverImgWrap.textContent = '📖';
-    const coverImg = document.createElement('img');
-    coverImg.id = 'cover-img';
-    coverImg.alt = 'Cover';
-    coverImgWrap.appendChild(coverImg);
+    if (story.coverImage) {
+      const coverImg = document.createElement('img');
+      coverImg.src = story.coverImage;
+      coverImg.alt = 'Cover';
+      coverImg.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+      coverImgWrap.textContent = '';
+      coverImgWrap.appendChild(coverImg);
+    } else {
+      coverImgWrap.textContent = '📖';
+    }
     const coverBand = document.createElement('div');
     coverBand.className = 'cover-text-band';
     coverBand.innerHTML = `<div class="cover-book-title">${story.title}</div><div class="cover-book-sub">A story for ${name} ✨</div>`;
@@ -329,15 +331,15 @@ async function generateStory() {
 
       const imgWrap = document.createElement('div');
       imgWrap.className = 'story-img-wrap';
-      imgWrap.dataset.prompt = page.imagePrompt;
-      imgWrap.dataset.index = i;
-      const placeholder = document.createElement('div');
-      placeholder.className = 'img-placeholder';
-      placeholder.textContent = '🎨';
-      const img = document.createElement('img');
-      img.alt = `Page ${i+1}`;
-      imgWrap.appendChild(placeholder);
-      imgWrap.appendChild(img);
+      if (page.image) {
+        const img = document.createElement('img');
+        img.src = page.image;
+        img.alt = `Page ${i+1}`;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;opacity:1;';
+        imgWrap.appendChild(img);
+      } else {
+        imgWrap.textContent = EMOJIS[i % EMOJIS.length];
+      }
 
       const textBand = document.createElement('div');
       textBand.className = 'story-text-band';
@@ -359,7 +361,7 @@ async function generateStory() {
     show('book-screen');
     window.scrollTo(0, 0);
 
-    loadImagesSequentially(story, container);
+    // Images already embedded in story from server
 
   } catch(err) {
     show('form-screen');
@@ -369,35 +371,7 @@ async function generateStory() {
   }
 }
 
-async function loadImagesSequentially(story, container) {
-  // Cover first
-  const coverImg = document.getElementById('cover-img');
-  const coverWrap = coverImg?.parentNode;
-  if (coverImg) {
-    await new Promise(resolve => {
-      coverImg.onload = () => { coverImg.classList.add('loaded'); if(coverWrap) coverWrap.textContent = ''; coverWrap.appendChild(coverImg); resolve(); };
-      coverImg.onerror = () => resolve();
-      coverImg.src = imgUrl(`children's book cover, ${story.title}, ${story.pages[0]?.imagePrompt}`, 9999);
-    });
-    await new Promise(r => setTimeout(r, 800));
-  }
 
-  // Pages one by one
-  const imgWraps = container.querySelectorAll('.story-img-wrap');
-  for (let i = 0; i < imgWraps.length; i++) {
-    const wrap = imgWraps[i];
-    const prompt = wrap.dataset.prompt;
-    const img = wrap.querySelector('img');
-    const ph = wrap.querySelector('.img-placeholder');
-    if (!prompt || !img) continue;
-    await new Promise(resolve => {
-      img.onload = () => { img.classList.add('loaded'); if (ph) ph.classList.add('hidden'); resolve(); };
-      img.onerror = () => { if (ph) ph.textContent = EMOJIS[parseInt(wrap.dataset.index) % EMOJIS.length]; resolve(); };
-      img.src = imgUrl(prompt, 1000 + i);
-    });
-    await new Promise(r => setTimeout(r, 800));
-  }
-}
 
 function goBack() {
   show('form-screen');
@@ -408,5 +382,3 @@ function goBack() {
 </body>
 </html>
 
-  
-  
