@@ -43,7 +43,7 @@ exports.handler = async function(event, context) {
     try {
       const fullPrompt = `${prompt}, watercolor illustration style, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words`;
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${geminiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${geminiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
