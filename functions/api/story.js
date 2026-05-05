@@ -209,49 +209,7 @@ Story: ${JSON.stringify(story)}`;
     console.error('Review error:', err.message);
   }
 
-  // ── GENERATE IMAGES IN PARALLEL (Pollinations) ────────────────────────────
-  const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words";
-
-  const fetchImage = async (prompt, seed) => {
-    try {
-      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + IMG_STYLE)}?width=800&height=500&nologo=true&seed=${seed}`;
-      const res = await fetch(url);
-      if (!res.ok) return null;
-      const buffer = await res.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-      return `data:image/jpeg;base64,${base64}`;
-    } catch(err) {
-      return null;
-    }
-  };
-
-  try {
-    const coverPrompt = `children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`;
-    const allPrompts = [coverPrompt, ...story.pages.map(p => p.imagePrompt)];
-    const seeds = allPrompts.map((_, i) => 9999 - i * 37);
-
-    const imageResults = [];
-    const batchSize = 2;
-    for (let i = 0; i < allPrompts.length; i += batchSize) {
-      const batch = allPrompts.slice(i, i + batchSize);
-      const batchSeeds = seeds.slice(i, i + batchSize);
-      const batchResults = await Promise.all(
-        batch.map((prompt, j) => fetchImage(prompt, batchSeeds[j]))
-      );
-      imageResults.push(...batchResults);
-      if (i + batchSize < allPrompts.length) {
-        await new Promise(r => setTimeout(r, 1000));
-      }
-    }
-
-    story.coverImage = imageResults[0] || null;
-    story.pages = story.pages.map((page, i) => ({
-      ...page,
-      image: imageResults[i + 1] || null
-    }));
-  } catch(err) {
-    console.error('Image generation error:', err.message);
-  }
-
+  // No images for now — returning story text only
   return Response.json(story);
 }
+
