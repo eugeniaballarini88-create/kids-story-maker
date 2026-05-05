@@ -13,13 +13,35 @@ exports.handler = async function(event, context) {
   catch(e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body.' }) }; }
 
   const { name, age, gender, topic, moral, pages } = body;
+  const isFictional = body.mode === 'fictional';
 
-  // ── LAYER 1: TOPIC PRE-SCREENING ─────────────────────────────────────────
-  const screeningPrompt = `You are a content moderation system for a children's story app designed for children aged 0-5.
+  // Shared fetch helper
+  const callClaude = async (model, messages, system, maxTokens) => {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        ...(system && { system }),
+        messages
+      })
+    });
+    const data = await res.json();
+    return data?.content?.[0]?.text || '';
+  };
 
-Your job is to evaluate whether a story topic submitted by a parent is safe and appropriate.
+  // ── LAYER 1: TOPIC PRE-SCREENING (Haiku — fast, cheap) ───────────────────
+  try {
+    const screeningPrompt = `You are a content moderation system for a children's story app for children aged 0-5.
 
-HARD BLOCKS — refuse if the topic involves any of these:
+Evaluate whether this story topic is safe and appropriate.
+
+HARD BLOCKS — refuse if the topic involves:
 - Homicide, murder, killing, death by violence
 - Suicide or self-harm
 - Drugs or substance use
@@ -45,47 +67,19 @@ HARD BLOCKS — refuse if the topic involves any of these:
 - Disturbing or reality-distorting content
 - Graphic illness, injury, or medical procedures
 
-ALSO REFUSE if the topic is:
-- Completely unclear, meaningless, or gibberish (e.g. "asdfgh", "nothing", "???")
-- Too vague to generate a safe story (e.g. "something scary", "a bad thing happened")
+ALSO REFUSE if the topic is completely unclear, meaningless, or gibberish.
 
-ALLOWED — these sensitive topics ARE permitted if handled gently:
-- Death of a pet or grandparent
-- New sibling, divorce, moving house
-- Starting school, making friends, loneliness
-- Worry, anxiety, anger
-- Adoption, blended families
-- A parent working away
-- Disability, cultural identity
-- Fear of the dark, nightmares (must resolve safely)
-- Loss of a comfort object
-- Doctor visits, haircuts, first experiences
+ALLOWED sensitive topics (handle gently): death of a pet or grandparent, new sibling, divorce, moving house, starting school, making friends, loneliness, worry, anxiety, anger, adoption, blended families, parent working away, disability, cultural identity, fear of the dark, nightmares, loss of a comfort object, doctor visits, haircuts, first experiences.
 
-Evaluate the following topic and respond with ONLY a JSON object in this exact format:
-{"approved": true} if the topic is safe
-{"approved": false, "reason": "A brief, friendly explanation for the parent (1-2 sentences, no jargon, warm tone)"} if refused
+Respond with ONLY valid JSON:
+{"approved": true} if safe
+{"approved": false, "reason": "Brief warm friendly message for the parent (1-2 sentences)"} if refused
 
-Topic to evaluate: "${topic || ''}"
+Topic: "${topic || ''}"
 Child name: "${name || ''}"
 Child age: "${age || ''}"`;
 
-  try {
-    const screenRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 200,
-        messages: [{ role: 'user', content: screeningPrompt }]
-      })
-    });
-
-    const screenData = await screenRes.json();
-    const screenText = screenData.content[0].text.trim();
+    const screenText = await callClaude('claude-haiku-4-5-20251001', [{ role: 'user', content: screeningPrompt }], null, 200);
     let screening;
     try { screening = JSON.parse(screenText.replace(/```json|```/g, '').trim()); }
     catch(e) { screening = { approved: true }; }
@@ -96,16 +90,16 @@ Child age: "${age || ''}"`;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           blocked: true,
-          reason: screening.reason || "We weren't able to create a story for this topic. Please try a different theme that is suitable for young children."
+          reason: screening.reason || "We weren't able to create a story for this topic. Please try a different theme suitable for young children."
         })
       };
     }
   } catch(err) {
-    // If screening fails, proceed — don't block on a screening error
     console.error('Screening error:', err.message);
+    // If screening fails, proceed
   }
 
-  // ── LAYER 2: CONTROLLED GENERATION ───────────────────────────────────────
+  // ── LAYER 2: CONTROLLED GENERATION (Sonnet — best quality) ───────────────
   const ageLabel = {
     '0-1': 'baby (0-1 years) — use very simple words, rhythm and repetition, 1-2 sentences per page',
     '2-3': 'toddler (2-3 years) — use simple concrete words, short sentences, 2-3 sentences per page',
@@ -153,15 +147,13 @@ STORY STRUCTURE:
 
 Return only valid JSON, no markdown, no explanation.`;
 
-  const isFictional = body.mode === 'fictional';
-
-  const jsonStructure = `Return ONLY this JSON structure:
+  const jsonStructure = `Return ONLY this JSON structure, no markdown:
 {
   "title": "Story title",
   "pages": [
     {
       "text": "Page text in English (appropriate length for ${ageLabel})",
-      "imagePrompt": "Vivid, specific scene description in English for a watercolor children's book illustrator. Describe characters, setting, mood, colors. Child-safe. No text in image."
+      "imagePrompt": "Vivid specific scene for a watercolor children's book illustrator. Describe characters, setting, mood, colors. Child-safe. No text in image."
     }
   ]
 }
@@ -174,7 +166,6 @@ FICTIONAL CHARACTER MODE:
 - Do NOT use the child's real name. Do NOT address the reader directly.
 - Invent a warm loveable animal or fantasy character as the protagonist (e.g. a little bear, a small rabbit, a tiny owl, a gentle fox).
 - The character should be ${genderDesc} and face the same emotional journey described in the topic.
-- The child being read to will recognise themselves in the character without being named directly.
 - Give the animal character a simple warm name (e.g. Pip, Bea, Milo, Luna).
 - If the topic mentions a baby brother, the baby animal is male. If baby sister, female. Do not assign a name to the baby unless specified.
 
@@ -186,40 +177,18 @@ ${jsonStructure}`
 Topic: ${topic}.
 ${moralLine}
 
-Important notes:
+Important:
 - ${name || 'The child'} is ${genderDesc} — use correct gender references throughout
-- If the topic mentions a baby brother, the baby is a BOY. If baby sister, she is a GIRL. Do not assign a name to the baby unless specified
-- Keep vocabulary and sentence length appropriate for ${ageLabel}
+- If the topic mentions a baby brother, the baby is a BOY. If baby sister, she is a GIRL. Do not assign a name to the baby unless specified.
+- Keep vocabulary appropriate for ${ageLabel}
 
 ${jsonStructure}`;
 
   let story;
   try {
-    const storyRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 4000,
-        system,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
-    });
-
-    if (!storyRes.ok) {
-      const err = await storyRes.json().catch(() => ({}));
-      return { statusCode: storyRes.status, body: JSON.stringify({ error: err?.error?.message || 'Story generation failed.' }) };
-    }
-
-    const storyData = await storyRes.json();
-    const storyText = storyData.content[0].text;
+    const storyText = await callClaude('claude-sonnet-4-6', [{ role: 'user', content: userPrompt }], system, 4000);
     try { story = JSON.parse(storyText.replace(/```json|```/g, '').trim()); }
     catch(e) { return { statusCode: 500, body: JSON.stringify({ error: 'Could not read the story. Please try again.' }) }; }
-
     if (!story.title || !story.pages?.length) {
       return { statusCode: 500, body: JSON.stringify({ error: 'Incomplete story received. Please try again.' }) };
     }
@@ -227,12 +196,11 @@ ${jsonStructure}`;
     return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Story generation failed.' }) };
   }
 
-  // ── LAYER 3: STORY REVIEW ─────────────────────────────────────────────────
-  const reviewPrompt = `You are a content reviewer for a children's story app for children aged 0-5.
+  // ── LAYER 3: STORY REVIEW (Haiku — fast, cheap) ───────────────────────────
+  try {
+    const reviewPrompt = `You are a content reviewer for a children's story app for children aged 0-5.
 
-Review the following story and check it against these criteria:
-
-FAIL if the story contains ANY of the following:
+FAIL if the story contains ANY of:
 - Violence, harm, or threat of any kind
 - Dark, scary, or disturbing content
 - Adult concepts (alcohol, drugs, weapons, war, politics, religion)
@@ -243,37 +211,14 @@ FAIL if the story contains ANY of the following:
 - Content inappropriate for children aged 0-5
 - Baby or sibling assigned a random name not provided by the parent
 
-PASS if the story:
-- Is warm, gentle and age-appropriate
-- Names and resolves any difficult emotions positively
-- Has a trusted adult present and supportive
-- Ends reassuringly and hopefully
-- Uses simple language appropriate for young children
+PASS if the story is warm, gentle, age-appropriate, resolves difficult emotions positively, has a trusted adult present, and ends reassuringly.
 
-Respond with ONLY a JSON object:
-{"approved": true} if the story passes
-{"approved": false, "reason": "Brief internal note on why it failed (for logging)"} if it fails
+Respond with ONLY valid JSON:
+{"approved": true} or {"approved": false, "reason": "brief note"}
 
-Story to review:
-${JSON.stringify(story)}`;
+Story: ${JSON.stringify(story)}`;
 
-  try {
-    const reviewRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 200,
-        messages: [{ role: 'user', content: reviewPrompt }]
-      })
-    });
-
-    const reviewData = await reviewRes.json();
-    const reviewText = reviewData.content[0].text.trim();
+    const reviewText = await callClaude('claude-haiku-4-5-20251001', [{ role: 'user', content: reviewPrompt }], null, 200);
     let review;
     try { review = JSON.parse(reviewText.replace(/```json|```/g, '').trim()); }
     catch(e) { review = { approved: true }; }
@@ -289,8 +234,8 @@ ${JSON.stringify(story)}`;
       };
     }
   } catch(err) {
-    // If review fails, proceed — don't block on a review error
     console.error('Review error:', err.message);
+    // If review fails, proceed
   }
 
   // ── ALL LAYERS PASSED — RETURN STORY ──────────────────────────────────────
