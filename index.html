@@ -191,7 +191,7 @@
     <button class="back-btn" onclick="goBack()">← New Story</button>
     <div class="book-title-bar" id="book-title-bar"></div>
   </div>
-  <p class="pdf-note">💡 Your story is generating with illustrations — this may take up to 30 seconds</p>
+  <p class="pdf-note">✨ Illustrations coming soon — stories generate in seconds</p>
   <div class="book-pages" id="page-container"></div>
   <button class="new-story-btn" onclick="goBack()" style="margin-top:1rem;">✨ Create Another Story</button>
 </div>
@@ -307,16 +307,8 @@ async function generateStory() {
     cover.className = 'book-page';
     const coverImgWrap = document.createElement('div');
     coverImgWrap.className = 'cover-img-wrap';
-    if (story.coverImage) {
-      const coverImg = document.createElement('img');
-      coverImg.src = story.coverImage;
-      coverImg.alt = 'Cover';
-      coverImg.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-      coverImgWrap.textContent = '';
-      coverImgWrap.appendChild(coverImg);
-    } else {
-      coverImgWrap.textContent = '📖';
-    }
+    coverImgWrap.style.cssText = 'background: linear-gradient(135deg, #fde8c8 0%, #fbc4a0 50%, #c8e6f5 100%);';
+    coverImgWrap.innerHTML = '<div style="font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;">📖</div>';
     const coverBand = document.createElement('div');
     coverBand.className = 'cover-text-band';
     coverBand.innerHTML = `<div class="cover-book-title">${story.title}</div><div class="cover-book-sub">A story for ${name} ✨</div>`;
@@ -325,21 +317,24 @@ async function generateStory() {
     container.appendChild(cover);
 
     // Pages
+    const gradients = [
+      'linear-gradient(135deg,#fde8c8,#fbc4a0)',
+      'linear-gradient(135deg,#c8e6f5,#a8d8ea)',
+      'linear-gradient(135deg,#d4f0c0,#b8e0a8)',
+      'linear-gradient(135deg,#f5d0e8,#e8b4d0)',
+      'linear-gradient(135deg,#fde8c8,#c8e6f5)',
+      'linear-gradient(135deg,#e8d5f5,#d0b8e8)',
+      'linear-gradient(135deg,#fef0c0,#fde8a0)',
+      'linear-gradient(135deg,#c8f0e8,#a8e0d0)',
+    ];
     story.pages.forEach((page, i) => {
       const pageEl = document.createElement('div');
       pageEl.className = 'book-page story-page-card';
 
       const imgWrap = document.createElement('div');
       imgWrap.className = 'story-img-wrap';
-      if (page.image) {
-        const img = document.createElement('img');
-        img.src = page.image;
-        img.alt = `Page ${i+1}`;
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;opacity:1;';
-        imgWrap.appendChild(img);
-      } else {
-        imgWrap.textContent = EMOJIS[i % EMOJIS.length];
-      }
+      imgWrap.style.cssText = `background: ${gradients[i % gradients.length]};`;
+      imgWrap.innerHTML = `<div style="font-size:2.5rem;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">${EMOJIS[i % EMOJIS.length]}</div>`;
 
       const textBand = document.createElement('div');
       textBand.className = 'story-text-band';
@@ -361,7 +356,7 @@ async function generateStory() {
     show('book-screen');
     window.scrollTo(0, 0);
 
-    // Images already embedded in story from server
+    // Text only — images coming soon
 
   } catch(err) {
     show('form-screen');
@@ -381,5 +376,6 @@ function goBack() {
 </script>
 </body>
 </html>
+
 
   
