@@ -186,6 +186,26 @@ Story: ${JSON.stringify(story)}`;
             prompt: `${prompt}, ${IMG_STYLE}`,
             num_steps: 4,
           });
+          // flux-1-schnell returns a ReadableStream
+          if (response instanceof ReadableStream) {
+            const reader = response.getReader();
+            const chunks = [];
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+            }
+            const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+            const combined = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const chunk of chunks) {
+              combined.set(chunk, offset);
+              offset += chunk.length;
+            }
+            const base64 = btoa(String.fromCharCode(...combined));
+            return `data:image/jpeg;base64,${base64}`;
+          }
+          // Some versions return {image: base64string}
           if (response?.image) {
             return `data:image/jpeg;base64,${response.image}`;
           }
@@ -213,3 +233,4 @@ Story: ${JSON.stringify(story)}`;
   return Response.json(story);
 }
 
+     
