@@ -4,6 +4,8 @@ exports.handler = async function(event, context) {
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
+
   if (!apiKey) {
     return { statusCode: 500, body: JSON.stringify({ error: 'API key not configured on server.' }) };
   }
@@ -15,7 +17,7 @@ exports.handler = async function(event, context) {
   const { name, age, gender, topic, moral, pages } = body;
   const isFictional = body.mode === 'fictional';
 
-  // Shared fetch helper
+  // Shared Claude helper
   const callClaude = async (model, messages, system, maxTokens) => {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -35,7 +37,36 @@ exports.handler = async function(event, context) {
     return data?.content?.[0]?.text || '';
   };
 
-  // ── LAYER 1: TOPIC PRE-SCREENING (Haiku — fast, cheap) ───────────────────
+  // Gemini image generation helper
+  const generateImage = async (prompt) => {
+    if (!geminiKey) return null;
+    try {
+      const fullPrompt = `${prompt}, watercolor illustration style, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words`;
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${geminiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: fullPrompt }] }],
+            generationConfig: { responseModalities: ['IMAGE', 'TEXT'] }
+          })
+        }
+      );
+      const data = await res.json();
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
+      if (imagePart?.inlineData?.data) {
+        return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+      }
+      return null;
+    } catch(err) {
+      console.error('Image generation error:', err.message);
+      return null;
+    }
+  };
+
+  // ── LAYER 1: TOPIC PRE-SCREENING (Haiku) ─────────────────────────────────
   try {
     const screeningPrompt = `You are a content moderation system for a children's story app for children aged 0-5.
 
@@ -96,10 +127,9 @@ Child age: "${age || ''}"`;
     }
   } catch(err) {
     console.error('Screening error:', err.message);
-    // If screening fails, proceed
   }
 
-  // ── LAYER 2: CONTROLLED GENERATION (Sonnet — best quality) ───────────────
+  // ── LAYER 2: CONTROLLED GENERATION (Sonnet) ───────────────────────────────
   const ageLabel = {
     '0-1': 'baby (0-1 years) — use very simple words, rhythm and repetition, 1-2 sentences per page',
     '2-3': 'toddler (2-3 years) — use simple concrete words, short sentences, 2-3 sentences per page',
@@ -196,7 +226,7 @@ ${jsonStructure}`;
     return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Story generation failed.' }) };
   }
 
-  // ── LAYER 3: STORY REVIEW (Haiku — fast, cheap) ───────────────────────────
+  // ── LAYER 3: STORY REVIEW (Haiku) ─────────────────────────────────────────
   try {
     const reviewPrompt = `You are a content reviewer for a children's story app for children aged 0-5.
 
@@ -235,10 +265,28 @@ Story: ${JSON.stringify(story)}`;
     }
   } catch(err) {
     console.error('Review error:', err.message);
-    // If review fails, proceed
   }
 
-  // ── ALL LAYERS PASSED — RETURN STORY ──────────────────────────────────────
+  // ── GENERATE IMAGES IN PARALLEL (Gemini) ──────────────────────────────────
+  if (geminiKey) {
+    try {
+      const coverPrompt = `children's book cover for "${story.title}", ${story.pages[0]?.imagePrompt}`;
+      const allPrompts = [coverPrompt, ...story.pages.map(p => p.imagePrompt)];
+
+      const imageResults = await Promise.all(allPrompts.map(prompt => generateImage(prompt)));
+
+      story.coverImage = imageResults[0] || null;
+      story.pages = story.pages.map((page, i) => ({
+        ...page,
+        image: imageResults[i + 1] || null
+      }));
+    } catch(err) {
+      console.error('Parallel image generation error:', err.message);
+      // Continue without images rather than failing
+    }
+  }
+
+  // ── RETURN STORY WITH IMAGES ──────────────────────────────────────────────
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
