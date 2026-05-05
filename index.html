@@ -272,7 +272,7 @@ async function generateStory() {
   try {
     setProgress(30, 'Writing your story...');
 
-    const res = await fetch('/.netlify/functions/story', {
+    const res = await fetch('/api/story', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, age, gender, topic, moral, pages, mode: storyMode })
@@ -382,3 +382,4 @@ function goBack() {
 </body>
 </html>
 
+  
