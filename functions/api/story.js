@@ -30,7 +30,7 @@ export async function onRequestPost({ request, env }) {
     return data?.content?.[0]?.text || '';
   };
 
-  // LAYER 1: SCREENING
+  // ── LAYER 1: TOPIC PRE-SCREENING ─────────────────────────────────────────
   try {
     const screenText = await callClaude('claude-haiku-4-5-20251001', [{
       role: 'user',
@@ -52,7 +52,7 @@ Topic: "${topic || ''}", Child: "${name || ''}", Age: "${age || ''}"`
     }
   } catch(err) {}
 
-  // LAYER 2: GENERATION
+  // ── LAYER 2: CONTROLLED GENERATION ───────────────────────────────────────
   const ageLabel = {
     '0-1': 'baby (0-1 years) — very simple words, rhythm, repetition, 1-2 sentences per page',
     '2-3': 'toddler (2-3 years) — simple concrete words, short sentences, 2-3 sentences per page',
@@ -84,7 +84,7 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
     return Response.json({ error: 'Could not generate story. Please try again.' }, { status: 500 });
   }
 
-  // LAYER 3: REVIEW
+  // ── LAYER 3: STORY REVIEW ─────────────────────────────────────────────────
   try {
     const reviewText = await callClaude('claude-haiku-4-5-20251001', [{
       role: 'user',
