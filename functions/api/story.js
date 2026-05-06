@@ -78,10 +78,18 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
   let story;
   try {
     const text = await callClaude('claude-sonnet-4-6', [{ role: 'user', content: prompt }], system, 4000);
-    story = JSON.parse(text.replace(/```json|```/g, '').trim());
-    if (!story.title || !story.pages?.length) throw new Error('Incomplete story.');
+    if (!text) return Response.json({ error: 'Empty response from Claude.' }, { status: 500 });
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    try {
+      story = JSON.parse(cleaned);
+    } catch(parseErr) {
+      return Response.json({ error: 'JSON parse failed: ' + cleaned.slice(0, 100) }, { status: 500 });
+    }
+    if (!story.title || !story.pages?.length) {
+      return Response.json({ error: 'Incomplete story: ' + JSON.stringify(story).slice(0, 100) }, { status: 500 });
+    }
   } catch(err) {
-    return Response.json({ error: 'Could not generate story. Please try again.' }, { status: 500 });
+    return Response.json({ error: 'Claude call failed: ' + err.message }, { status: 500 });
   }
 
   // ── LAYER 3: STORY REVIEW ─────────────────────────────────────────────────
