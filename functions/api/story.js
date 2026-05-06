@@ -27,7 +27,10 @@ export async function onRequestPost({ request, env }) {
       })
     });
     const data = await res.json();
-    return data?.content?.[0]?.text || '';
+    if (!res.ok) throw new Error(data?.error?.message || 'Claude API error ' + res.status);
+    const text = data?.content?.[0]?.text;
+    if (!text) throw new Error('Empty response from Claude API');
+    return text;
   };
 
   // ── LAYER 1: TOPIC PRE-SCREENING ─────────────────────────────────────────
