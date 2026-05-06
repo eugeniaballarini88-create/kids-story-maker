@@ -1,5 +1,3 @@
-name = "kids-story-maker"
-pages_build_output_dir = "."
-
 [ai]
 binding = "AI"
+
