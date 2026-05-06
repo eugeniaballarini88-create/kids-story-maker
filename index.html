@@ -97,6 +97,18 @@
 
   .new-story-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 1rem; background: var(--dark); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
   .new-story-btn:hover { opacity: 0.85; }
+  .save-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: all 0.2s; }
+  .save-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .save-btn.saved { border-color: #27ae60; color: #27ae60; background: #f0fff4; }
+  .saved-section { width: 100%; max-width: 500px; margin-top: 1.5rem; }
+  .saved-section h3 { font-family: 'Lora', serif; font-size: 1rem; color: var(--brown); margin-bottom: 0.8rem; }
+  .saved-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .saved-item { background: white; border: 2px solid #ede5d8; border-radius: 12px; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: border-color 0.2s; }
+  .saved-item:hover { border-color: var(--accent); }
+  .saved-item-title { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--dark); font-style: italic; }
+  .saved-item-meta { font-size: 0.75rem; color: var(--soft); margin-top: 0.2rem; }
+  .saved-item-delete { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 0.2rem 0.5rem; border-radius: 6px; }
+  .saved-item-delete:hover { color: #e74c3c; background: #fff0f0; }
 
   @media (max-width: 520px) {
     .story-page-card, .story-page-card:nth-child(even) { grid-template-columns: 1fr; }
@@ -175,6 +187,12 @@
     <div class="error-box" id="error-box"></div>
     <div class="blocked-box" id="blocked-box"></div>
   </div>
+
+  <!-- SAVED STORIES -->
+  <div class="saved-section" id="saved-section" style="display:none;">
+    <h3>📚 Your Saved Stories</h3>
+    <div class="saved-list" id="saved-list"></div>
+  </div>
 </div>
 
 <!-- LOADING -->
@@ -190,6 +208,7 @@
   <div class="book-topbar">
     <button class="back-btn" onclick="goBack()">← New Story</button>
     <div class="book-title-bar" id="book-title-bar"></div>
+    <button class="save-btn" id="save-btn" onclick="saveStory()">🔖 Save</button>
   </div>
   <p class="pdf-note">✨ Illustrations coming soon — stories generate in seconds</p>
   <div class="book-pages" id="page-container"></div>
@@ -198,6 +217,9 @@
 
 <script>
 const EMOJIS = ['🌟','🌈','🌸','🦋','🌿','⭐','🐣','🍀','🌻','🦄','🐬','🌙','🎈','🦊','🐧'];
+let storyMode = 'personal';
+let currentStory = null;
+let currentName = '';
 
 function show(id) {
   ['form-screen','loading-screen','book-screen'].forEach(s => {
@@ -212,20 +234,16 @@ function setProgress(pct, label) {
 }
 
 function showError(msg) {
-  document.getElementById('error-box').textContent = msg;
-  document.getElementById('error-box').style.display = 'block';
+  const b = document.getElementById('error-box');
+  b.textContent = msg; b.style.display = 'block';
   document.getElementById('blocked-box').style.display = 'none';
 }
 
 function showBlocked(msg) {
-  document.getElementById('blocked-box').innerHTML = '🌟 ' + msg;
-  document.getElementById('blocked-box').style.display = 'block';
+  const b = document.getElementById('blocked-box');
+  b.innerHTML = '🌟 ' + msg; b.style.display = 'block';
   document.getElementById('error-box').style.display = 'none';
 }
-
-
-
-let storyMode = 'personal';
 
 function setMode(mode) {
   storyMode = mode;
@@ -233,7 +251,6 @@ function setMode(mode) {
   const hint = document.getElementById('mode-hint');
   const personalBtn = document.getElementById('mode-personal');
   const fictionalBtn = document.getElementById('mode-fictional');
-
   if (mode === 'personal') {
     personalBtn.classList.add('active');
     fictionalBtn.classList.remove('active');
@@ -250,20 +267,17 @@ function setMode(mode) {
 }
 
 async function generateStory() {
-  const name     = document.getElementById('child-name').value.trim() || 'your little one';
-  const age      = document.getElementById('age').value;
-  const gender   = document.getElementById('gender').value;
-  const topic    = document.getElementById('topic').value.trim();
-  const moral    = document.getElementById('moral').value.trim();
-  const pages    = document.getElementById('pages').value;
+  const name  = document.getElementById('child-name').value.trim() || 'your little one';
+  const age   = document.getElementById('age').value;
+  const gender= document.getElementById('gender').value;
+  const topic = document.getElementById('topic').value.trim();
+  const moral = document.getElementById('moral').value.trim();
+  const pages = document.getElementById('pages').value;
 
   document.getElementById('error-box').style.display = 'none';
   document.getElementById('blocked-box').style.display = 'none';
 
-  if (!topic) {
-    showError('Please enter a story topic or theme before continuing.');
-    return;
-  }
+  if (!topic) { showError('Please enter a story topic or theme before continuing.'); return; }
 
   document.querySelector('.generate-btn').disabled = true;
   show('loading-screen');
@@ -271,7 +285,6 @@ async function generateStory() {
 
   try {
     setProgress(30, 'Writing your story...');
-
     const res = await fetch('/api/story', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -280,12 +293,11 @@ async function generateStory() {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Server error ${res.status}`);
+      throw new Error(err.error || 'Server error ' + res.status);
     }
 
     const data = await res.json();
 
-    // Handle blocked topics
     if (data.blocked) {
       show('form-screen');
       document.querySelector('.generate-btn').disabled = false;
@@ -293,70 +305,18 @@ async function generateStory() {
       return;
     }
 
-    const story = data;
-    if (!story.title || !story.pages?.length) throw new Error('Incomplete story received. Please try again.');
+    if (!data.title || !data.pages?.length) throw new Error('Incomplete story received. Please try again.');
 
     setProgress(80, 'Building your book...');
-
-    const container = document.getElementById('page-container');
-    container.innerHTML = '';
-    document.getElementById('book-title-bar').textContent = story.title;
-
-    // Cover
-    const cover = document.createElement('div');
-    cover.className = 'book-page';
-    const coverImgWrap = document.createElement('div');
-    coverImgWrap.className = 'cover-img-wrap';
-    coverImgWrap.style.cssText = 'background: linear-gradient(135deg, #fde8c8 0%, #fbc4a0 50%, #c8e6f5 100%);';
-    coverImgWrap.innerHTML = '<div style="font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;">📖</div>';
-    const coverBand = document.createElement('div');
-    coverBand.className = 'cover-text-band';
-    coverBand.innerHTML = `<div class="cover-book-title">${story.title}</div><div class="cover-book-sub">A story for ${name} ✨</div>`;
-    cover.appendChild(coverImgWrap);
-    cover.appendChild(coverBand);
-    container.appendChild(cover);
-
-    // Pages
-    const gradients = [
-      'linear-gradient(135deg,#fde8c8,#fbc4a0)',
-      'linear-gradient(135deg,#c8e6f5,#a8d8ea)',
-      'linear-gradient(135deg,#d4f0c0,#b8e0a8)',
-      'linear-gradient(135deg,#f5d0e8,#e8b4d0)',
-      'linear-gradient(135deg,#fde8c8,#c8e6f5)',
-      'linear-gradient(135deg,#e8d5f5,#d0b8e8)',
-      'linear-gradient(135deg,#fef0c0,#fde8a0)',
-      'linear-gradient(135deg,#c8f0e8,#a8e0d0)',
-    ];
-    story.pages.forEach((page, i) => {
-      const pageEl = document.createElement('div');
-      pageEl.className = 'book-page story-page-card';
-
-      const imgWrap = document.createElement('div');
-      imgWrap.className = 'story-img-wrap';
-      imgWrap.style.cssText = `background: ${gradients[i % gradients.length]};`;
-      imgWrap.innerHTML = `<div style="font-size:2.5rem;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">${EMOJIS[i % EMOJIS.length]}</div>`;
-
-      const textBand = document.createElement('div');
-      textBand.className = 'story-text-band';
-      textBand.innerHTML = `<div class="story-page-num">Page ${i+1}</div><div class="story-page-text">${page.text}</div>`;
-
-      pageEl.appendChild(imgWrap);
-      pageEl.appendChild(textBand);
-      container.appendChild(pageEl);
-    });
-
-    // End page
-    const end = document.createElement('div');
-    end.className = 'book-page end-page';
-    end.innerHTML = `<h2>The End 🌟</h2><p>A story made with love for ${name}</p>`;
-    container.appendChild(end);
-
+    currentStory = data;
+    currentName = name;
+    document.getElementById('save-btn').textContent = '🔖 Save';
+    document.getElementById('save-btn').classList.remove('saved');
+    renderBook(data, name);
     setProgress(100, 'Your story is ready!');
     await new Promise(r => setTimeout(r, 400));
     show('book-screen');
     window.scrollTo(0, 0);
-
-    // Text only — images coming soon
 
   } catch(err) {
     show('form-screen');
@@ -366,16 +326,123 @@ async function generateStory() {
   }
 }
 
+function renderBook(story, name) {
+  const container = document.getElementById('page-container');
+  container.innerHTML = '';
+  document.getElementById('book-title-bar').textContent = story.title;
 
+  // Cover
+  const cover = document.createElement('div');
+  cover.className = 'book-page';
+  const coverImgWrap = document.createElement('div');
+  coverImgWrap.className = 'cover-img-wrap';
+  coverImgWrap.style.cssText = 'background: linear-gradient(135deg, #fde8c8 0%, #fbc4a0 50%, #c8e6f5 100%);';
+  coverImgWrap.innerHTML = '<div style="font-size:4rem;display:flex;align-items:center;justify-content:center;height:100%;">📖</div>';
+  const coverBand = document.createElement('div');
+  coverBand.className = 'cover-text-band';
+  coverBand.innerHTML = '<div class="cover-book-title">' + story.title + '</div><div class="cover-book-sub">A story for ' + name + ' ✨</div>';
+  cover.appendChild(coverImgWrap);
+  cover.appendChild(coverBand);
+  container.appendChild(cover);
+
+  // Pages
+  const gradients = [
+    'linear-gradient(135deg,#fde8c8,#fbc4a0)',
+    'linear-gradient(135deg,#c8e6f5,#a8d8ea)',
+    'linear-gradient(135deg,#d4f0c0,#b8e0a8)',
+    'linear-gradient(135deg,#f5d0e8,#e8b4d0)',
+    'linear-gradient(135deg,#fde8c8,#c8e6f5)',
+    'linear-gradient(135deg,#e8d5f5,#d0b8e8)',
+    'linear-gradient(135deg,#fef0c0,#fde8a0)',
+    'linear-gradient(135deg,#c8f0e8,#a8e0d0)',
+  ];
+
+  story.pages.forEach(function(page, i) {
+    const pageEl = document.createElement('div');
+    pageEl.className = 'book-page story-page-card';
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'story-img-wrap';
+    imgWrap.style.cssText = 'background: ' + gradients[i % gradients.length] + ';';
+    imgWrap.innerHTML = '<div style="font-size:2.5rem;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">' + EMOJIS[i % EMOJIS.length] + '</div>';
+    const textBand = document.createElement('div');
+    textBand.className = 'story-text-band';
+    textBand.innerHTML = '<div class="story-page-num">Page ' + (i+1) + '</div><div class="story-page-text">' + page.text + '</div>';
+    pageEl.appendChild(imgWrap);
+    pageEl.appendChild(textBand);
+    container.appendChild(pageEl);
+  });
+
+  const end = document.createElement('div');
+  end.className = 'book-page end-page';
+  end.innerHTML = '<h2>The End 🌟</h2><p>A story made with love for ' + name + '</p>';
+  container.appendChild(end);
+}
+
+// ── SAVE / LOAD ──────────────────────────────────────────────────────────
+function saveStory() {
+  if (!currentStory) return;
+  const btn = document.getElementById('save-btn');
+  const list = JSON.parse(localStorage.getItem('savedStories') || '[]');
+  const key = Date.now().toString();
+  list.unshift({ key, title: currentStory.title, name: currentName, date: new Date().toLocaleDateString(), story: currentStory });
+  localStorage.setItem('savedStories', JSON.stringify(list));
+  btn.textContent = '✅ Saved!';
+  btn.classList.add('saved');
+  setTimeout(function() { btn.textContent = '🔖 Save'; btn.classList.remove('saved'); }, 2000);
+  renderSavedList();
+}
+
+function renderSavedList() {
+  const list = JSON.parse(localStorage.getItem('savedStories') || '[]');
+  const section = document.getElementById('saved-section');
+  const el = document.getElementById('saved-list');
+  if (!section || !el) return;
+  if (list.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  el.innerHTML = '';
+  list.forEach(function(entry) {
+    const item = document.createElement('div');
+    item.className = 'saved-item';
+    const info = document.createElement('div');
+    info.style.flex = '1';
+    info.innerHTML = '<div class="saved-item-title">' + entry.title + '</div><div class="saved-item-meta">For ' + entry.name + ' · ' + entry.date + '</div>';
+    info.addEventListener('click', function() { loadStory(entry); });
+    const del = document.createElement('button');
+    del.className = 'saved-item-delete';
+    del.textContent = '✕';
+    del.addEventListener('click', function() { deleteStory(entry.key); });
+    item.appendChild(info);
+    item.appendChild(del);
+    el.appendChild(item);
+  });
+}
+
+function loadStory(entry) {
+  currentStory = entry.story;
+  currentName = entry.name;
+  renderBook(entry.story, entry.name);
+  document.getElementById('book-title-bar').textContent = entry.story.title;
+  document.getElementById('save-btn').textContent = '🔖 Save';
+  show('book-screen');
+  window.scrollTo(0, 0);
+}
+
+function deleteStory(key) {
+  const list = JSON.parse(localStorage.getItem('savedStories') || '[]').filter(function(s) { return s.key !== key; });
+  localStorage.setItem('savedStories', JSON.stringify(list));
+  renderSavedList();
+}
 
 function goBack() {
   show('form-screen');
   document.querySelector('.generate-btn').disabled = false;
   window.scrollTo(0, 0);
+  renderSavedList();
 }
+
+renderSavedList();
 </script>
 </body>
 </html>
-
 
   
