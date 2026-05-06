@@ -77,18 +77,11 @@
   .cover-book-sub { color: rgba(255,255,255,0.65); font-size: 0.8rem; }
 
   /* Story pages */
-  .story-page-card { display: grid; grid-template-columns: 220px 1fr; min-height: 200px; }
-  .story-page-card:nth-child(even) { grid-template-columns: 1fr 220px; }
-  .story-page-card:nth-child(even) .story-img-wrap { order: 2; }
-  .story-page-card:nth-child(even) .story-text-band { order: 1; border-left: none; border-right: 3px solid var(--accent); }
-  .story-img-wrap { overflow: hidden; background: linear-gradient(135deg,#fde8c8,#d4eef8); display: flex; align-items: center; justify-content: center; position: relative; min-height: 200px; font-size: 2.5rem; }
-  .story-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.5s; position: absolute; inset: 0; }
-  .story-img-wrap img.loaded { opacity: 1; }
-  .story-img-wrap .img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background: linear-gradient(135deg,#fde8c8,#d4eef8); transition: opacity 0.5s; }
-  .story-img-wrap .img-placeholder.hidden { opacity: 0; pointer-events: none; }
-  .story-text-band { padding: 1.5rem 1.8rem; display: flex; flex-direction: column; justify-content: center; border-left: 3px solid var(--accent); }
-  .story-page-num { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--soft); margin-bottom: 0.5rem; }
-  .story-page-text { font-family: 'Lora', serif; font-size: 1rem; line-height: 1.8; color: var(--dark); }
+  .story-page-card { display: block; }
+  .story-img-wrap { display: none; }
+  .story-text-band { padding: 2rem 2.5rem; display: flex; flex-direction: column; justify-content: center; border-left: 4px solid var(--accent); }
+  .story-page-num { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--soft); margin-bottom: 0.8rem; }
+  .story-page-text { font-family: 'Lora', serif; font-size: 1.15rem; line-height: 1.9; color: var(--dark); }
 
   /* End page */
   .end-page { background: var(--accent); padding: 3rem 2rem; text-align: center; }
@@ -360,14 +353,9 @@ function renderBook(story, name) {
   story.pages.forEach(function(page, i) {
     const pageEl = document.createElement('div');
     pageEl.className = 'book-page story-page-card';
-    const imgWrap = document.createElement('div');
-    imgWrap.className = 'story-img-wrap';
-    imgWrap.style.cssText = 'background: ' + gradients[i % gradients.length] + ';';
-    imgWrap.innerHTML = '<div style="font-size:2.5rem;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">' + EMOJIS[i % EMOJIS.length] + '</div>';
     const textBand = document.createElement('div');
     textBand.className = 'story-text-band';
     textBand.innerHTML = '<div class="story-page-num">Page ' + (i+1) + '</div><div class="story-page-text">' + page.text + '</div>';
-    pageEl.appendChild(imgWrap);
     pageEl.appendChild(textBand);
     container.appendChild(pageEl);
   });
@@ -444,5 +432,3 @@ renderSavedList();
 </script>
 </body>
 </html>
-
-  
