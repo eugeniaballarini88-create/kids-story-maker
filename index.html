@@ -3,16 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Story Maker ✨</title>
+<title>Little by Little</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;600;700;800&display=swap');
 
   :root {
-    --cream: #fdf8f0;
-    --brown: #8b5e3c;
-    --dark: #3d2b1f;
-    --accent: #e8763a;
-    --soft: #c9a87c;
+    --cream: #fdfaf5;
+    --brown: #1a8a78;
+    --dark: #0d4a3d;
+    --accent: #e8a020;
+    --soft: #3a8a7a;
+    --border: #b0e0d8;
+    --input-bg: #f5fdfb;
+    --sub: #a07020;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,14 +23,14 @@
 
   /* FORM */
   #form-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; }
-  .form-card { background: white; border-radius: 24px; padding: 2.5rem 2rem; width: 100%; max-width: 500px; box-shadow: 0 8px 40px rgba(139,94,60,0.12); }
+  .form-card { background: white; border-radius: 24px; padding: 2.5rem 2rem; width: 100%; max-width: 500px; box-shadow: 0 8px 40px rgba(26,138,120,0.10); border: 1px solid #b0e0d8; }
   .form-header { text-align: center; margin-bottom: 2rem; }
   .form-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
   .form-title { font-family: 'Lora', serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 0.4rem; }
-  .form-subtitle { color: var(--soft); font-size: 0.85rem; line-height: 1.5; }
+  .form-subtitle { color: var(--sub); font-size: 0.85rem; line-height: 1.5; }
   .field { margin-bottom: 1.2rem; }
   label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brown); margin-bottom: 0.4rem; }
-  input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 2px solid #ede5d8; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--dark); background: var(--cream); transition: border-color 0.2s; outline: none; }
+  input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; color: var(--dark); background: var(--input-bg); transition: border-color 0.2s; outline: none; }
   input:focus, select:focus, textarea:focus { border-color: var(--accent); background: white; }
   textarea { resize: none; height: 80px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
@@ -35,7 +38,7 @@
   .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,118,58,0.4); }
   .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
   .error-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 12px; padding: 1rem; color: #c0392b; font-size: 0.9rem; margin-top: 1rem; display: none; line-height: 1.5; }
-  .blocked-box { background: #fff8f0; border: 1px solid #f0c8a0; border-radius: 12px; padding: 1rem; color: #8b5e3c; font-size: 0.9rem; margin-top: 1rem; display: none; line-height: 1.5; }
+  .blocked-box { background: #f0faf8; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; color: var(--dark); font-size: 0.9rem; margin-top: 1rem; display: none; line-height: 1.5; }
 
   /* STORY MODE TOGGLE */
   .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 1.2rem; border: 2px solid #ede5d8; border-radius: 12px; overflow: hidden; }
@@ -50,7 +53,7 @@
   #loading-screen { display: none; min-height: 100vh; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; }
   .loading-book { font-size: 4rem; animation: bounce 1s ease-in-out infinite; }
   @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-  .loading-text { font-family: 'Lora', serif; font-size: 1.3rem; color: var(--brown); }
+  .loading-text { font-family: 'Lora', serif; font-size: 1.3rem; color: var(--dark); }
   .loading-dots::after { content: ''; animation: dots 1.5s infinite; }
   @keyframes dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
   .progress-bar-wrap { width: 260px; height: 6px; background: #ede5d8; border-radius: 99px; overflow: hidden; }
@@ -58,36 +61,36 @@
   .progress-label { font-size: 0.8rem; color: var(--soft); text-align: center; }
 
   /* BOOK SCREEN */
-  #book-screen { display: none; background: #e8e0d8; min-height: 100vh; padding: 2rem 1rem 4rem; }
+  #book-screen { display: none; background: #e8f5f2; min-height: 100vh; padding: 2rem 1rem 4rem; }
   .book-topbar { display: flex; justify-content: space-between; align-items: center; max-width: 640px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
-  .back-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: border-color 0.2s; }
+  .back-btn { background: white; border: 2px solid var(--border); border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--dark); cursor: pointer; transition: border-color 0.2s; }
   .back-btn:hover { border-color: var(--accent); color: var(--accent); }
   .book-title-bar { font-family: 'Lora', serif; font-size: 1rem; color: var(--dark); font-style: italic; text-align: center; flex: 1; }
   .pdf-note { font-size: 0.75rem; color: #999; text-align: center; max-width: 640px; margin: 0 auto 1rem; }
 
   /* BOOK PAGES */
   .book-pages { max-width: 640px; margin: 0 auto; }
-  .book-page { background: white; border-radius: 4px; box-shadow: 0 4px 24px rgba(0,0,0,0.15), 2px 2px 0 #d4c9bc; margin-bottom: 2rem; overflow: hidden; display: flex; flex-direction: column; }
+  .book-page { background: white; border-radius: 4px; box-shadow: 0 4px 24px rgba(26,138,120,0.12), 2px 2px 0 #b0e0d8; margin-bottom: 2rem; overflow: hidden; display: flex; flex-direction: column; }
 
   /* Cover */
   .cover-img-wrap { display: none; }
-  .cover-text-band { background: linear-gradient(135deg, #fde8c8 0%, #fbc4a0 50%, #c8e6f5 100%); padding: 2.5rem 2rem; text-align: center; }
-  .cover-book-title { font-family: 'Lora', serif; font-size: 1.8rem; color: var(--dark); line-height: 1.3; margin-bottom: 0.4rem; }
-  .cover-book-sub { color: var(--brown); font-size: 0.85rem; opacity: 0.8; }
+  .cover-text-band { background: linear-gradient(135deg, #e8f5f2 0%, #b0e0d8 50%, #fdf5e0 100%); padding: 2.5rem 2rem; text-align: center; }
+  .cover-book-title { font-family: 'Lora', serif; font-size: 1.8rem; color: #0d4a3d; line-height: 1.3; margin-bottom: 0.4rem; }
+  .cover-book-sub { color: var(--sub); font-size: 0.85rem; }
 
   /* Story pages */
   .story-page-card { display: block; }
   .story-img-wrap { display: none; }
-  .story-text-band { padding: 2rem 2.5rem; display: flex; flex-direction: column; justify-content: center; border-left: 4px solid var(--accent); }
-  .story-page-num { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--soft); margin-bottom: 0.8rem; }
+  .story-text-band { padding: 2rem 2.5rem; display: flex; flex-direction: column; justify-content: center; border-left: 4px solid #1a8a78; }
+  .story-page-num { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #3a8a7a; margin-bottom: 0.8rem; }
   .story-page-text { font-family: 'Lora', serif; font-size: 1.15rem; line-height: 1.9; color: var(--dark); }
 
   /* End page */
-  .end-page { background: var(--accent); padding: 3rem 2rem; text-align: center; }
+  .end-page { background: linear-gradient(135deg, #1a8a78, #0d4a3d); padding: 3rem 2rem; text-align: center; }
   .end-page h2 { font-family: 'Lora', serif; font-size: 2.2rem; color: white; margin-bottom: 0.4rem; }
   .end-page p { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
 
-  .new-story-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 1rem; background: var(--dark); color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
+  .new-story-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 1rem; background: #0d4a3d; color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
   .new-story-btn:hover { opacity: 0.85; }
   .save-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: all 0.2s; }
   .save-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -96,7 +99,7 @@
   .saved-section h3 { font-family: 'Lora', serif; font-size: 1rem; color: var(--brown); margin-bottom: 0.8rem; }
   .saved-list { display: flex; flex-direction: column; gap: 0.5rem; }
   .saved-item { background: white; border: 2px solid #ede5d8; border-radius: 12px; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: border-color 0.2s; }
-  .saved-item:hover { border-color: var(--accent); }
+  .saved-item:hover { border-color: var(--brown); }
   .saved-item-title { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--dark); font-style: italic; }
   .saved-item-meta { font-size: 0.75rem; color: var(--soft); margin-top: 0.2rem; }
   .saved-item-delete { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 0.2rem 0.5rem; border-radius: 6px; }
@@ -117,16 +120,16 @@
 <div id="form-screen">
   <div class="form-card">
     <div class="form-header">
-      <span class="form-emoji">📖</span>
-      <h1 class="form-title">Story Maker</h1>
-      <p class="form-subtitle">A personalised story creation tool for parents of children aged 0–5</p>
+      <span class="form-emoji">🌟</span>
+      <h1 class="form-title">Little by Little</h1>
+      <p class="form-subtitle">A story made just for them</p>
     </div>
 
     <!-- STORY MODE TOGGLE -->
     <div class="field">
       <label>Story Style</label>
       <div class="mode-toggle">
-        <button type="button" class="mode-btn active" id="mode-personal" onclick="setMode('personal')">👤 My child is the hero<br><span style="font-weight:400;font-size:0.75rem;">Uses your child's name</span></button>
+        <button type="button" class="mode-btn active" id="mode-personal" onclick="setMode('personal')">🧒 My child is the hero<br><span style="font-weight:400;font-size:0.75rem;">Uses your child's name</span></button>
         <button type="button" class="mode-btn" id="mode-fictional" onclick="setMode('fictional')">🐻 A fictional character<br><span style="font-weight:400;font-size:0.75rem;">Animal or fantasy hero</span></button>
       </div>
       <p class="mode-hint" id="mode-hint">The story will feature your child as the main character.</p>
@@ -152,7 +155,7 @@
       <select id="gender">
         <option value="girl">Girl</option>
         <option value="boy">Boy</option>
-        <option value="neutral">Prefer not to say</option>
+        <option value="neutral">Just a child</option>
       </select>
     </div>
 
@@ -191,7 +194,7 @@
 <!-- LOADING -->
 <div id="loading-screen">
   <div class="loading-book">📖</div>
-  <div class="loading-text">Writing your story<span class="loading-dots"></span></div>
+  <div class="loading-text">Creating your story<span class="loading-dots"></span></div>
   <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
   <div class="progress-label" id="progress-label">Checking your topic...</div>
 </div>
@@ -255,7 +258,7 @@ function setMode(mode) {
     personalBtn.classList.remove('active');
     nameField.classList.add('dimmed');
     document.getElementById('child-name').placeholder = 'Optional — not used in story';
-    hint.textContent = 'Claude will invent a warm animal or fantasy character. Your child will see themselves in the story without being named.';
+    hint.textContent = "We'll invent a warm animal or fantasy character. Your child will see themselves in the story without being named.";
   }
 }
 
@@ -274,10 +277,10 @@ async function generateStory() {
 
   document.querySelector('.generate-btn').disabled = true;
   show('loading-screen');
-  setProgress(10, 'Checking your topic...');
+  setProgress(10, 'Getting ready...');
 
   try {
-    setProgress(30, 'Writing your story...');
+    setProgress(30, 'Once upon a time...');
     const res = await fetch('/api/story', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -300,13 +303,13 @@ async function generateStory() {
 
     if (!data.title || !data.pages?.length) throw new Error('Incomplete story received. Please try again.');
 
-    setProgress(80, 'Building your book...');
+    setProgress(80, 'Turning the pages...');
     currentStory = data;
     currentName = name;
     document.getElementById('save-btn').textContent = '🔖 Save';
     document.getElementById('save-btn').classList.remove('saved');
     renderBook(data, name);
-    setProgress(100, 'Your story is ready!');
+    setProgress(100, 'Your story is ready ✨');
     await new Promise(r => setTimeout(r, 400));
     show('book-screen');
     window.scrollTo(0, 0);
