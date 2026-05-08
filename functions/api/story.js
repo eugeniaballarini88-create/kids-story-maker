@@ -73,7 +73,7 @@ ALWAYS: name emotions simply, resolve them gently, include a supportive trusted 
 Use simple vocabulary appropriate for ${ageLabel}. Return only valid JSON, no markdown.`;
 
   const prompt = isFictional
-    ? `Write a children's picture book for a ${ageLabel}. Invent a warm animal character (${genderDesc}), give them a simple name (Pip, Bea, Milo, Luna). Do NOT use the child's real name. Topic: ${topic}. ${moralLine}
+    ? `Write a children's picture book for a ${ageLabel}. Invent a warm animal character (${genderDesc}), invent a fresh original name that fits their personality and species — avoid reusing common names, surprise us. Do NOT use the child's real name. Topic: ${topic}. ${moralLine}
 Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — exactly ${pageCount} pages.`
     : `Write a children's storybook for ${name || 'the child'} (${ageLabel}, ${genderDesc}, ${pronouns}). Topic: ${topic}. ${moralLine} Baby brother=BOY, baby sister=GIRL, no baby name unless given.
 Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — exactly ${pageCount} pages.`;
