@@ -92,7 +92,8 @@
 
   .new-story-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 1rem; background: #0d4a3d; color: white; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; text-align: center; }
   .new-story-btn:hover { opacity: 0.85; }
-  .save-btn { background: white; border: 2px solid #ede5d8; border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--brown); cursor: pointer; transition: all 0.2s; }
+  .book-actions { display: flex; gap: 0.4rem; }
+  .save-btn { background: white; border: 2px solid var(--border); border-radius: 10px; padding: 0.5rem 0.8rem; font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--dark); cursor: pointer; transition: all 0.2s; }
   .save-btn:hover { border-color: var(--accent); color: var(--accent); }
   .save-btn.saved { border-color: #27ae60; color: #27ae60; background: #f0fff4; }
   .saved-section { width: 100%; max-width: 500px; margin-top: 1.5rem; }
@@ -128,7 +129,7 @@
     <div class="form-header">
       <span class="form-emoji">🌟</span>
       <h1 class="form-title">Little by Little</h1>
-      <p class="form-subtitle">A story made just for them</p>
+      <p class="form-subtitle">One story at a time</p>
     </div>
 
     <!-- STORY MODE TOGGLE -->
@@ -144,7 +145,7 @@
     <div class="row">
       <div class="field" id="name-field">
         <label>Child's Name</label>
-        <input type="text" id="child-name" placeholder="e.g. Sofia" />
+        <input type="text" id="child-name" placeholder="e.g. Sofia, Leo, Mia..." />
       </div>
       <div class="field">
         <label>Age</label>
@@ -161,13 +162,13 @@
       <select id="gender">
         <option value="girl">Girl</option>
         <option value="boy">Boy</option>
-        <option value="neutral">Just a child</option>
+        <option value="neutral">No preference</option>
       </select>
     </div>
 
     <div class="field">
       <label>Story Topic / Theme</label>
-      <textarea id="topic" placeholder="e.g. Leo is nervous about starting nursery next week — he worries no one will want to play with him, but he loves dinosaurs and hopes to find a friend who does too."></textarea>
+      <textarea id="topic" placeholder="e.g. She's nervous about starting nursery next week — worried no one will want to play with her, but she loves dinosaurs and hopes to find a friend who does too."></textarea>
       <p style="font-size:0.78rem;color:var(--soft);margin-top:0.4rem;line-height:1.5;">💡 The more specific you are, the more personalised the story. Include your child's real feelings, what's happening in their life, and any details that matter to them.</p>
     </div>
 
@@ -210,8 +211,10 @@
   <div class="book-topbar">
     <button class="back-btn" onclick="goBack()">← New Story</button>
     <div class="book-title-bar" id="book-title-bar"></div>
-    <button class="save-btn" id="save-btn" onclick="saveStory()">🔖 Save</button>
-    <button class="save-btn" id="download-btn" onclick="downloadPDF()">⬇️ PDF</button>
+    <div class="book-actions">
+      <button class="save-btn" id="save-btn" onclick="saveStory()">🔖 Save</button>
+      <button class="save-btn" id="download-btn" onclick="downloadPDF()">⬇️ Download PDF</button>
+    </div>
   </div>
 
   <div class="book-pages" id="page-container"></div>
