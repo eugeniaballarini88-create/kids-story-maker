@@ -306,4 +306,273 @@
 
       if (!res.ok) {
         var errData = {};
-        try { errData = await res.json(); } catch(
+        try { errData = await res.json(); } catch(e) {}
+        throw new Error(errData.error || 'Server error ' + res.status);
+      }
+
+      var data = await res.json();
+
+      if (data.blocked) {
+        show('form-screen');
+        btn.disabled = false;
+        showBlocked(data.reason || 'This topic could not be used for a story.');
+        return;
+      }
+
+      if (!data.title || !Array.isArray(data.pages) || data.pages.length === 0) {
+        throw new Error('Incomplete story received. Please try again.');
+      }
+
+      setProgress(80, 'Turning the pages...');
+      currentStory = data;
+      currentName  = name;
+
+      var saveBtn = document.getElementById('save-btn');
+      if (saveBtn) { saveBtn.textContent = '🔖 Save'; saveBtn.classList.remove('saved'); }
+
+      renderBook(data, name);
+      setProgress(100, 'Your story is ready ✨');
+      await new Promise(function(r) { setTimeout(r, 400); });
+      show('book-screen');
+      window.scrollTo(0, 0);
+
+    } catch(err) {
+      show('form-screen');
+      btn.disabled = false;
+      showError('Something went wrong. Please try again.');
+      console.error(err);
+    }
+  }
+
+  function safeText(str) {
+    var d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function makeImageEl(src, alt) {
+    if (!src || typeof src !== 'string') return null;
+    if (!src.startsWith('data:image/')) return null;
+    var img = document.createElement('img');
+    img.src = src;
+    img.alt = alt || '';
+    return img;
+  }
+
+  function renderBook(story, name) {
+    var container = document.getElementById('page-container');
+    var titleBar  = document.getElementById('book-title-bar');
+    if (!container || !titleBar) return;
+
+    container.innerHTML = '';
+    titleBar.textContent = story.title || '';
+
+    // COVER
+    var cover = document.createElement('div');
+    cover.className = 'book-page';
+
+    var coverImgWrap = document.createElement('div');
+    coverImgWrap.className = 'cover-img-wrap';
+
+    var coverImg = makeImageEl(story.coverImage, story.title + ' cover');
+    if (coverImg) {
+      coverImgWrap.classList.add('has-image');
+      coverImgWrap.appendChild(coverImg);
+    } else {
+      var placeholder = document.createElement('div');
+      placeholder.className = 'cover-img-placeholder';
+      placeholder.innerHTML = '<span style="font-size:4rem;">📖</span>';
+      coverImgWrap.appendChild(placeholder);
+      coverImgWrap.style.display = 'block';
+      coverImgWrap.style.height = '240px';
+    }
+
+    var coverBand = document.createElement('div');
+    coverBand.className = 'cover-text-band';
+    coverBand.innerHTML =
+      '<div class="cover-book-title">' + safeText(story.title) + '</div>' +
+      '<div class="cover-book-sub">A story for ' + safeText(name) + ' ✨</div>';
+
+    cover.appendChild(coverImgWrap);
+    cover.appendChild(coverBand);
+    container.appendChild(cover);
+
+    // STORY PAGES
+    story.pages.forEach(function(page, i) {
+      if (!page || typeof page.text !== 'string') return;
+
+      var pageEl = document.createElement('div');
+      pageEl.className = 'book-page';
+
+      var imgWrap = document.createElement('div');
+      imgWrap.className = 'story-img-wrap';
+      var pageImg = makeImageEl(page.image, 'Page ' + (i + 1));
+      if (pageImg) {
+        imgWrap.classList.add('has-image');
+        imgWrap.appendChild(pageImg);
+        pageEl.appendChild(imgWrap);
+      }
+
+      var textBand = document.createElement('div');
+      textBand.className = 'story-text-band';
+      textBand.innerHTML =
+        '<div class="story-page-num">Page ' + (i + 1) + '</div>' +
+        '<div class="story-page-text">' + safeText(page.text) + '</div>';
+
+      pageEl.appendChild(textBand);
+      container.appendChild(pageEl);
+    });
+
+    // END PAGE
+    var end = document.createElement('div');
+    end.className = 'book-page end-page';
+    end.innerHTML =
+      '<h2>The End 🌟</h2>' +
+      '<p>A story made with love for ' + safeText(name) + '</p>';
+    container.appendChild(end);
+  }
+
+  function downloadPDF() {
+    if (!currentStory) return;
+    var win = window.open('', '_blank');
+    if (!win) return;
+
+    var story = currentStory;
+    var childName = currentName;
+
+    var pages = '';
+    story.pages.forEach(function(page, i) {
+      if (!page || typeof page.text !== 'string') return;
+      pages += '<div class="pg"><div class="pgn">Page ' + (i + 1) + '</div>'
+             + '<div class="pgt">' + safeText(page.text) + '</div></div>';
+    });
+
+    var css = [
+      '* {box-sizing:border-box;margin:0;padding:0}',
+      'body{font-family:Georgia,serif;background:white;color:#0d4a3d}',
+      '.wrap{max-width:600px;margin:0 auto;padding:2rem}',
+      '.brand{text-align:center;margin-bottom:2rem;color:#3a8a7a;font-size:0.8rem;font-weight:bold;letter-spacing:0.1em;font-family:sans-serif}',
+      '.cover{background:linear-gradient(135deg,#e8f5f2,#b0e0d8,#fdf5e0);padding:3rem 2rem;text-align:center;margin-bottom:2rem;border-radius:8px}',
+      '.ct{font-size:1.8rem;font-weight:600;color:#0d4a3d;line-height:1.3;margin-bottom:0.5rem}',
+      '.cs{color:#a07020;font-size:0.9rem;font-family:sans-serif}',
+      '.pg{padding:1.2rem 1.5rem;margin-bottom:1.2rem;border-left:4px solid #1a8a78;background:#f5fdfb;border-radius:0 8px 8px 0;page-break-inside:avoid}',
+      '.pgn{font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#3a8a7a;margin-bottom:0.4rem;font-family:sans-serif}',
+      '.pgt{font-size:1rem;line-height:1.8;color:#0d4a3d}',
+      '.end{background:linear-gradient(135deg,#1a8a78,#0d4a3d);padding:2rem;text-align:center;border-radius:8px;margin-top:1.5rem}',
+      '.end h2{color:white;font-size:1.3rem;margin-bottom:0.3rem}',
+      '.end p{color:rgba(255,255,255,0.8);font-size:0.82rem;font-family:sans-serif}',
+      '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
+    ].join('\n');
+
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+      + '<title>' + safeText(story.title) + '</title>'
+      + '<style>' + css + '</style></head><body><div class="wrap">'
+      + '<div class="brand">LITTLE BY LITTLE</div>'
+      + '<div class="cover"><div class="ct">' + safeText(story.title) + '</div>'
+      + '<div class="cs">A story for ' + safeText(childName) + '</div></div>'
+      + pages
+      + '<div class="end"><h2>The End</h2><p>A story made with love for ' + safeText(childName) + '</p></div>'
+      + '</div></body></html>';
+
+    win.document.write(html);
+    win.document.close();
+    setTimeout(function() { win.print(); }, 800);
+  }
+
+  function saveStory() {
+    if (!currentStory) return;
+    var btn = document.getElementById('save-btn');
+
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('savedStories') || '[]'); } catch(e) { list = []; }
+    if (!Array.isArray(list)) list = [];
+
+    var entry = {
+      key:   Date.now().toString(),
+      title: currentStory.title || 'Untitled',
+      name:  currentName,
+      date:  new Date().toLocaleDateString(),
+      story: currentStory
+    };
+    list.unshift(entry);
+
+    try { localStorage.setItem('savedStories', JSON.stringify(list)); } catch(e) {}
+
+    if (btn) {
+      btn.textContent = '✅ Saved!';
+      btn.classList.add('saved');
+      setTimeout(function() { btn.textContent = '🔖 Save'; btn.classList.remove('saved'); }, 2000);
+    }
+    renderSavedList();
+  }
+
+  function renderSavedList() {
+    var section = document.getElementById('saved-section');
+    var el      = document.getElementById('saved-list');
+    if (!section || !el) return;
+
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('savedStories') || '[]'); } catch(e) { list = []; }
+    if (!Array.isArray(list) || list.length === 0) { section.style.display = 'none'; return; }
+
+    section.style.display = 'block';
+    el.innerHTML = '';
+
+    list.forEach(function(entry) {
+      if (!entry || !entry.key) return;
+
+      var item = document.createElement('div');
+      item.className = 'saved-item';
+
+      var info = document.createElement('div');
+      info.style.flex = '1';
+      info.innerHTML =
+        '<div class="saved-item-title">' + safeText(entry.title) + '</div>' +
+        '<div class="saved-item-meta">For ' + safeText(entry.name) + ' · ' + safeText(entry.date) + '</div>';
+      info.addEventListener('click', function() { loadStory(entry); });
+
+      var del = document.createElement('button');
+      del.className = 'saved-item-delete';
+      del.textContent = '✕';
+      del.addEventListener('click', function() { deleteStory(entry.key); });
+
+      item.appendChild(info);
+      item.appendChild(del);
+      el.appendChild(item);
+    });
+  }
+
+  function loadStory(entry) {
+    if (!entry || !entry.story) return;
+    currentStory = entry.story;
+    currentName  = entry.name || '';
+    renderBook(entry.story, currentName);
+    var titleBar = document.getElementById('book-title-bar');
+    if (titleBar) titleBar.textContent = entry.story.title || '';
+    var saveBtn = document.getElementById('save-btn');
+    if (saveBtn) saveBtn.textContent = '🔖 Save';
+    show('book-screen');
+    window.scrollTo(0, 0);
+  }
+
+  function deleteStory(key) {
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('savedStories') || '[]'); } catch(e) { list = []; }
+    if (!Array.isArray(list)) list = [];
+    list = list.filter(function(s) { return s && s.key !== key; });
+    try { localStorage.setItem('savedStories', JSON.stringify(list)); } catch(e) {}
+    renderSavedList();
+  }
+
+  function goBack() {
+    show('form-screen');
+    var btn = document.querySelector('.generate-btn');
+    if (btn) btn.disabled = false;
+    window.scrollTo(0, 0);
+    renderSavedList();
+  }
+
+  renderSavedList();
+</script>
+</body>
+</html>
