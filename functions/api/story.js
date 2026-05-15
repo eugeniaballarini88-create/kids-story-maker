@@ -139,8 +139,36 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
     }
   } catch(err) {}
 
-  // TEST: check if AI binding is available
-  story._aiBindingAvailable = typeof env.AI !== 'undefined';
+  // ── GENERATE IMAGES WITH CLOUDFLARE WORKERS AI ──────────────────────────
+  if (env.AI) {
+    const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words";
+
+    const generateImage = async (prompt) => {
+      try {
+        const response = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+          prompt: prompt + ', ' + IMG_STYLE,
+          num_steps: 4,
+        });
+        if (response && response.image) {
+          return 'data:image/jpeg;base64,' + response.image;
+        }
+        return null;
+      } catch(err) {
+        console.error('Image error:', err.message);
+        return null;
+      }
+    };
+
+    try {
+      // TEST: generate cover image only first
+      const coverPrompt = "children's book cover for '" + story.title + "', " + (story.pages[0] ? story.pages[0].imagePrompt : '') + ', ' + IMG_STYLE;
+      story.coverImage = await generateImage(coverPrompt);
+      story._coverImageGenerated = story.coverImage !== null;
+    } catch(err) {
+      console.error('Image generation failed:', err.message);
+      story._coverImageGenerated = false;
+    }
+  }
 
   return Response.json(story);
 }
