@@ -139,14 +139,14 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
     }
   } catch(err) {}
 
-  // ── GENERATE IMAGES WITH CLOUDFLARE WORKERS AI ──────────────────────────
+  // ── GENERATE COVER IMAGE WITH CLOUDFLARE WORKERS AI ──────────────────────
   if (env.AI) {
-    const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words";
+    const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words, no letters";
 
     const generateImage = async (prompt) => {
       try {
         const response = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
-          prompt: prompt + ', ' + IMG_STYLE,
+          prompt: prompt,
           num_steps: 4,
         });
         if (response && response.image) {
@@ -160,8 +160,7 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
     };
 
     try {
-      // TEST: generate cover image only first
-      const coverPrompt = "children's book cover for '" + story.title + "', " + (story.pages[0] ? story.pages[0].imagePrompt : '') + ', ' + IMG_STYLE;
+      const coverPrompt = (story.pages[0] ? story.pages[0].imagePrompt : "a warm friendly children's book cover scene") + ', ' + IMG_STYLE + ', no title, no text, no letters, no words anywhere in the image';
       story.coverImage = await generateImage(coverPrompt);
       story._coverImageGenerated = story.coverImage !== null;
     } catch(err) {
