@@ -64,11 +64,6 @@ Topic: "${topic || ''}", Child: "${name || ''}", Age: "${age || ''}"`
 
   const pronouns = gender === 'girl' ? 'she/her' : gender === 'boy' ? 'he/him' : 'they/them';
   const genderDesc = gender === 'girl' ? 'a girl' : gender === 'boy' ? 'a boy' : 'a child';
-  const pronounNote = gender === 'neutral'
-    ? 'IMPORTANT: This child has no specified gender. Use ONLY they/them/their pronouns throughout. Never use he, him, his, she, her, hers. Every single pronoun must be they/them/their.'
-    : gender === 'girl'
-    ? 'Use she/her pronouns consistently throughout.'
-    : 'Use he/him pronouns consistently throughout.';
   const moralLine = moral ? `Gently teach: "${moral}".` : '';
   const pageCount = parseInt(pages) || 6;
 
@@ -98,13 +93,20 @@ STORY STRUCTURE:
 - Final pages: Resolution that feels earned — not instant, not magical, but warm and true
 - The moral must be shown through action, never stated directly
 
+IMAGE PROMPT RULES — for every page imagePrompt:
+- Start with a SHORT character description tag like: [CHAR: girl, black curly hair, blue eyes, red dress] — invent this once and repeat it identically on every single page
+- Then describe the scene for that page
+- End with the mood/lighting
+- Example: "[CHAR: small brown rabbit, white fluffy tail, yellow scarf] sitting alone under a big oak tree, looking up at falling autumn leaves, soft golden afternoon light"
+- The character tag MUST be identical on every page — same words, same order
+
 Return only valid JSON, no markdown.`;
 
   const prompt = isFictional
     ? `Write a children's picture book for a ${ageLabel}. Invent a warm animal character (${genderDesc}), invent a fresh original name that fits their personality and species — avoid reusing common names, surprise us. Do NOT use the child's real name. Topic: ${topic}. ${moralLine}
-Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — exactly ${pageCount} pages.`
+Return ONLY: {"title":"...","characterDescription":"one sentence physical description of the main character","pages":[{"text":"...","imagePrompt":"..."}]} — exactly ${pageCount} pages.`
     : `Write a children's storybook for ${name || 'the child'} (${ageLabel}, ${genderDesc}, ${pronouns}). Topic: ${topic}. ${moralLine} Baby brother=BOY, baby sister=GIRL, no baby name unless given.
-Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — exactly ${pageCount} pages.`;
+Return ONLY: {"title":"...","characterDescription":"one sentence physical description of the main character","pages":[{"text":"...","imagePrompt":"..."}]} — exactly ${pageCount} pages.`;
 
   let story;
   try {
@@ -139,7 +141,7 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
     }
   } catch(err) {}
 
-  // ── GENERATE COVER IMAGE WITH CLOUDFLARE WORKERS AI ──────────────────────
+  // ── GENERATE ALL IMAGES WITH CLOUDFLARE WORKERS AI ───────────────────────
   if (env.AI) {
     const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words, no letters";
 
@@ -159,13 +161,24 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
       }
     };
 
+    // Cover image
     try {
       const coverPrompt = (story.pages[0] ? story.pages[0].imagePrompt : "a warm friendly children's book cover scene") + ', ' + IMG_STYLE + ', no title, no text, no letters, no words anywhere in the image';
       story.coverImage = await generateImage(coverPrompt);
-      story._coverImageGenerated = story.coverImage !== null;
     } catch(err) {
-      console.error('Image generation failed:', err.message);
-      story._coverImageGenerated = false;
+      console.error('Cover image failed:', err.message);
+      story.coverImage = null;
+    }
+
+    // Page images — one by one
+    for (let i = 0; i < story.pages.length; i++) {
+      try {
+        const pagePrompt = story.pages[i].imagePrompt + ', ' + IMG_STYLE + ', no text, no words, no letters';
+        story.pages[i].image = await generateImage(pagePrompt);
+      } catch(err) {
+        console.error('Page ' + (i + 1) + ' image failed:', err.message);
+        story.pages[i].image = null;
+      }
     }
   }
 
