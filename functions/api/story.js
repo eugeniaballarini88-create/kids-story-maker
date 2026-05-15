@@ -64,6 +64,11 @@ Topic: "${topic || ''}", Child: "${name || ''}", Age: "${age || ''}"`
 
   const pronouns = gender === 'girl' ? 'she/her' : gender === 'boy' ? 'he/him' : 'they/them';
   const genderDesc = gender === 'girl' ? 'a girl' : gender === 'boy' ? 'a boy' : 'a child';
+  const pronounNote = gender === 'neutral'
+    ? 'IMPORTANT: This child has no specified gender. Use ONLY they/them/their pronouns throughout. Never use he, him, his, she, her, hers. Every single pronoun must be they/them/their.'
+    : gender === 'girl'
+    ? 'Use she/her pronouns consistently throughout.'
+    : 'Use he/him pronouns consistently throughout.';
   const moralLine = moral ? `Gently teach: "${moral}".` : '';
   const pageCount = parseInt(pages) || 6;
 
@@ -133,6 +138,9 @@ Return ONLY: {"title":"...","pages":[{"text":"...","imagePrompt":"..."}]} — ex
       return Response.json({ blocked: true, reason: "We weren't able to create a safe story for this topic. Please try a different theme." });
     }
   } catch(err) {}
+
+  // TEST: check if AI binding is available
+  story._aiBindingAvailable = typeof env.AI !== 'undefined';
 
   return Response.json(story);
 }
