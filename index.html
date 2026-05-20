@@ -200,6 +200,7 @@
       <button class="save-btn" id="download-btn" onclick="downloadPDF()">⬇️ Download PDF</button>
     </div>
   </div>
+  <p style="text-align:center;font-size:0.75rem;color:#999;max-width:640px;margin:0 auto -1rem;">💡 Save keeps the text only. Download PDF to keep the full illustrated story.</p>
 
   <div class="book-pages" id="page-container"></div>
   <button class="new-story-btn" onclick="goBack()" style="margin-top:1rem;">✨ Create Another Story</button>
@@ -363,7 +364,6 @@
     // COVER
     var cover = document.createElement('div');
     cover.className = 'book-page';
-
     var coverImgWrap = document.createElement('div');
     coverImgWrap.className = 'cover-img-wrap';
     var coverImg = makeImageEl(story.coverImage, story.title + ' cover');
@@ -378,13 +378,11 @@
       coverImgWrap.style.display = 'block';
       coverImgWrap.style.height = '240px';
     }
-
     var coverBand = document.createElement('div');
     coverBand.className = 'cover-text-band';
     coverBand.innerHTML =
       '<div class="cover-book-title">' + safeText(story.title) + '</div>' +
       '<div class="cover-book-sub">A story for ' + safeText(name) + ' ✨</div>';
-
     cover.appendChild(coverImgWrap);
     cover.appendChild(coverBand);
     container.appendChild(cover);
@@ -392,10 +390,8 @@
     // STORY PAGES
     story.pages.forEach(function(page, i) {
       if (!page || typeof page.text !== 'string') return;
-
       var pageEl = document.createElement('div');
       pageEl.className = 'book-page';
-
       var imgWrap = document.createElement('div');
       imgWrap.className = 'story-img-wrap';
       var pageImg = makeImageEl(page.image, 'Page ' + (i + 1));
@@ -404,13 +400,11 @@
         imgWrap.appendChild(pageImg);
         pageEl.appendChild(imgWrap);
       }
-
       var textBand = document.createElement('div');
       textBand.className = 'story-text-band';
       textBand.innerHTML =
         '<div class="story-page-num">Page ' + (i + 1) + '</div>' +
         '<div class="story-page-text">' + safeText(page.text) + '</div>';
-
       pageEl.appendChild(textBand);
       container.appendChild(pageEl);
     });
@@ -422,7 +416,7 @@
     container.appendChild(end);
   }
 
-  // ── PDF DOWNLOAD (with images) ────────────────────────────────────────
+  // ── PDF DOWNLOAD ──────────────────────────────────────────────────────
   function downloadPDF() {
     if (!currentStory) return;
     var win = window.open('', '_blank');
@@ -474,25 +468,50 @@
       '@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }'
     ].join('\n');
 
+    var printScript = [
+      'window.addEventListener("load", function() {',
+      '  var imgs = document.images;',
+      '  var total = imgs.length;',
+      '  if (total === 0) { window.print(); return; }',
+      '  var loaded = 0;',
+      '  function checkDone() { loaded++; if (loaded >= total) { setTimeout(function(){ window.print(); }, 300); } }',
+      '  for (var i = 0; i < imgs.length; i++) {',
+      '    if (imgs[i].complete) { checkDone(); }',
+      '    else { imgs[i].addEventListener("load", checkDone); imgs[i].addEventListener("error", checkDone); }',
+      '  }',
+      '});'
+    ].join('\n');
+
     var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
       + '<title>' + safeText(story.title) + '</title>'
-      + '<style>' + css + '</style></head><body><div class="wrap">'
+      + '<style>' + css + '</style>'
+      + '</head><body><div class="wrap">'
       + '<div class="brand">LITTLE BY LITTLE</div>'
-      + '<div class="cover">'
-      + coverImgHtml
+      + '<div class="cover">' + coverImgHtml
       + '<div class="cover-text"><div class="ct">' + safeText(story.title) + '</div>'
-      + '<div class="cs">A story for ' + safeText(childName) + '</div></div>'
-      + '</div>'
+      + '<div class="cs">A story for ' + safeText(childName) + '</div></div></div>'
       + pagesHtml
       + '<div class="end"><h2>The End</h2><p>A story made with love for ' + safeText(childName) + '</p></div>'
-      + '</div></body></html>';
+      + '</div><script>' + printScript + '<\/script></body></html>';
 
     win.document.write(html);
     win.document.close();
-    setTimeout(function() { win.print(); }, 800);
   }
 
   // ── SAVE / LOAD ───────────────────────────────────────────────────────
+  // Images stripped before saving — base64 is too large for localStorage.
+  // Text and prompts are kept. Use Download PDF to keep the full illustrated story.
+  function storyWithoutImages(story) {
+    if (!story) return story;
+    return {
+      title: story.title || '',
+      characterDescription: story.characterDescription || '',
+      pages: (story.pages || []).map(function(p) {
+        return { text: p.text || '', imagePrompt: p.imagePrompt || '' };
+      })
+    };
+  }
+
   function saveStory() {
     if (!currentStory) return;
     var btn = document.getElementById('save-btn');
@@ -506,15 +525,24 @@
       title: currentStory.title || 'Untitled',
       name:  currentName,
       date:  new Date().toLocaleDateString(),
-      story: currentStory
+      story: storyWithoutImages(currentStory)
     });
 
-    try { localStorage.setItem('savedStories', JSON.stringify(list)); } catch(e) {}
+    var saved = false;
+    try {
+      localStorage.setItem('savedStories', JSON.stringify(list));
+      saved = true;
+    } catch(e) {
+      while (list.length > 1) {
+        list.pop();
+        try { localStorage.setItem('savedStories', JSON.stringify(list)); saved = true; break; } catch(e2) {}
+      }
+    }
 
     if (btn) {
-      btn.textContent = '✅ Saved!';
+      btn.textContent = saved ? '✅ Saved (text only)' : '⚠️ Could not save';
       btn.classList.add('saved');
-      setTimeout(function() { btn.textContent = '🔖 Save'; btn.classList.remove('saved'); }, 2000);
+      setTimeout(function() { btn.textContent = '🔖 Save'; btn.classList.remove('saved'); }, 3000);
     }
     renderSavedList();
   }
@@ -535,19 +563,16 @@
       if (!entry || !entry.key) return;
       var item = document.createElement('div');
       item.className = 'saved-item';
-
       var info = document.createElement('div');
       info.style.flex = '1';
       info.innerHTML =
         '<div class="saved-item-title">' + safeText(entry.title) + '</div>' +
         '<div class="saved-item-meta">For ' + safeText(entry.name) + ' · ' + safeText(entry.date) + '</div>';
       info.addEventListener('click', function() { loadStory(entry); });
-
       var del = document.createElement('button');
       del.className = 'saved-item-delete';
       del.textContent = '✕';
       del.addEventListener('click', function() { deleteStory(entry.key); });
-
       item.appendChild(info);
       item.appendChild(del);
       el.appendChild(item);
