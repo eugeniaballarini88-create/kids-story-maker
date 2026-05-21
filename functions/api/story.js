@@ -143,13 +143,12 @@ Return ONLY: {"title":"...","characterDescription":"one sentence physical descri
 
   // ── GENERATE ALL IMAGES WITH CLOUDFLARE WORKERS AI ───────────────────────
   if (env.AI) {
-    const IMG_STYLE = "flat vector illustration, children's picture book, soft pastel colors, simple clean shapes, minimal detail, no hands visible, wide shot scene, warm and gentle, child-safe, no text, no words, no letters";
+    const IMG_STYLE = "children's picture book illustration, soft pastel colors, warm and gentle, consistent character design, child-safe, no text, no words, no letters";
 
     const generateImage = async (prompt) => {
       try {
-        const response = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+        const response = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', {
           prompt: prompt,
-          num_steps: 4,
         });
         if (response && response.image) {
           return 'data:image/jpeg;base64,' + response.image;
