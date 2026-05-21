@@ -150,8 +150,13 @@ Return ONLY: {"title":"...","characterDescription":"one sentence physical descri
         const response = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', {
           prompt: prompt,
         });
-        if (response && response.image) {
-          return 'data:image/jpeg;base64,' + response.image;
+        // SDXL returns a ReadableStream of raw bytes
+        if (response) {
+          const buffer = response instanceof ReadableStream
+            ? await new Response(response).arrayBuffer()
+            : response;
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+          return 'data:image/png;base64,' + base64;
         }
         return null;
       } catch(err) {
