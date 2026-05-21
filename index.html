@@ -47,16 +47,50 @@
   .field.dimmed label { color: #ccc; }
   .field.dimmed input { color: #bbb; border-color: #f0ebe3; background: #faf7f3; }
 
-  #loading-screen { display: none; min-height: 100vh; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; }
-  .loading-book { font-size: 4rem; animation: bounce 1s ease-in-out infinite; }
-  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-  .loading-text { font-family: 'Lora', serif; font-size: 1.3rem; color: var(--dark); }
-  .loading-dots::after { content: ''; animation: dots 1.5s infinite; }
-  @keyframes dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
-  .progress-bar-wrap { width: 260px; height: 6px; background: #ede5d8; border-radius: 99px; overflow: hidden; }
-  .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
-  .progress-label { font-size: 0.8rem; color: var(--soft); text-align: center; }
+  /* LOADING — updated colours and layout */
+  #loading-screen {
+    display: none; min-height: 100vh;
+    align-items: center; justify-content: center; flex-direction: column;
+    gap: 1.2rem;
+    background: linear-gradient(160deg, #e8f5f2 0%, #f5fdfb 100%);
+  }
+  .loading-icon { font-size: 4rem; animation: float 2s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .loading-title {
+    font-family: 'Lora', serif; font-size: 1.4rem;
+    color: var(--dark); font-style: italic;
+  }
+  .loading-step {
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+    color: var(--soft); font-weight: 700; letter-spacing: 0.02em;
+    min-height: 1.4rem; transition: opacity 0.4s;
+  }
+  .progress-bar-wrap {
+    width: 280px; height: 8px;
+    background: var(--border); border-radius: 99px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; background: linear-gradient(90deg, var(--brown), var(--accent));
+    border-radius: 99px; width: 0%; transition: width 0.6s ease;
+  }
+  .loading-pages-grid {
+    display: flex; gap: 0.4rem; flex-wrap: wrap;
+    justify-content: center; max-width: 280px;
+  }
+  .loading-page-dot {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--border); display: flex; align-items: center;
+    justify-content: center; font-size: 0.65rem; font-weight: 800;
+    color: var(--soft); transition: all 0.4s;
+  }
+  .loading-page-dot.painting { background: var(--accent); color: white; animation: pulse 0.8s ease-in-out infinite; }
+  .loading-page-dot.done { background: var(--brown); color: white; animation: none; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+  .loading-eta {
+    font-size: 0.75rem; color: #aaa; font-family: 'Nunito', sans-serif;
+  }
 
+  /* BOOK SCREEN */
   #book-screen { display: none; background: #e8f5f2; min-height: 100vh; padding: 2rem 1rem 4rem; }
   .book-topbar { display: flex; justify-content: space-between; align-items: center; max-width: 640px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
   .back-btn { background: white; border: 2px solid var(--border); border-radius: 10px; padding: 0.5rem 1rem; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--dark); cursor: pointer; transition: border-color 0.2s; }
@@ -184,10 +218,14 @@
 
 <!-- LOADING -->
 <div id="loading-screen">
-  <div class="loading-book">📖</div>
-  <div class="loading-text">Creating your story<span class="loading-dots"></span></div>
-  <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
-  <div class="progress-label" id="progress-label">Checking your topic...</div>
+  <div class="loading-icon">📖</div>
+  <div class="loading-title">Making your story...</div>
+  <div class="loading-step" id="loading-step">Getting ready</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+  <div class="loading-pages-grid" id="loading-pages-grid"></div>
+  <div class="loading-eta" id="loading-eta"></div>
 </div>
 
 <!-- BOOK -->
@@ -210,6 +248,7 @@
   var storyMode = 'personal';
   var currentStory = null;
   var currentName = '';
+  var loadingTimer = null;
 
   function show(id) {
     var screens = ['form-screen', 'loading-screen', 'book-screen'];
@@ -220,11 +259,92 @@
     });
   }
 
-  function setProgress(pct, label) {
-    var bar = document.getElementById('progress-bar');
-    var lbl = document.getElementById('progress-label');
-    if (bar) bar.style.width = pct + '%';
-    if (lbl) lbl.textContent = label;
+  // ── LOADING ANIMATION ─────────────────────────────────────────────────
+  function startLoadingAnimation(pageCount) {
+    var bar       = document.getElementById('progress-bar');
+    var stepEl    = document.getElementById('loading-step');
+    var etaEl     = document.getElementById('loading-eta');
+    var gridEl    = document.getElementById('loading-pages-grid');
+
+    // Build page dots
+    gridEl.innerHTML = '';
+    var dots = [];
+    for (var i = 0; i < pageCount; i++) {
+      var dot = document.createElement('div');
+      dot.className = 'loading-page-dot';
+      dot.textContent = i + 1;
+      gridEl.appendChild(dot);
+      dots.push(dot);
+    }
+
+    // Timeline of steps — roughly matches real backend timing
+    // Total ~90s for 8 pages: ~5s screening, ~10s writing, ~5s review, ~8s per image
+    var totalSecs = 10 + (pageCount * 8);
+    var steps = [
+      { at: 0,    pct: 5,  label: '✅ Checking your topic...' },
+      { at: 4,    pct: 15, label: '✍️ Writing your story...' },
+      { at: 14,   pct: 28, label: '📖 Reviewing your story...' },
+      { at: 18,   pct: 35, label: '🎨 Painting the cover...' },
+    ];
+    // Add one step per page
+    for (var p = 0; p < pageCount; p++) {
+      steps.push({
+        at: 22 + (p * 8),
+        pct: 35 + Math.round(((p + 1) / (pageCount + 1)) * 60),
+        label: '🎨 Painting page ' + (p + 1) + ' of ' + pageCount + '...',
+        pageIndex: p
+      });
+    }
+
+    var startTime = Date.now();
+    var stepIndex = 0;
+
+    if (loadingTimer) clearInterval(loadingTimer);
+
+    loadingTimer = setInterval(function() {
+      var elapsed = (Date.now() - startTime) / 1000;
+      var remaining = Math.max(0, totalSecs - elapsed);
+
+      // Update ETA
+      if (remaining > 5) {
+        etaEl.textContent = 'About ' + Math.ceil(remaining) + ' seconds to go';
+      } else {
+        etaEl.textContent = 'Almost there...';
+      }
+
+      // Advance steps
+      while (stepIndex < steps.length && elapsed >= steps[stepIndex].at) {
+        var s = steps[stepIndex];
+        if (bar) bar.style.width = s.pct + '%';
+        if (stepEl) stepEl.textContent = s.label;
+        // Mark page dot
+        if (s.pageIndex !== undefined && dots[s.pageIndex]) {
+          // Mark previous as done
+          if (s.pageIndex > 0 && dots[s.pageIndex - 1]) {
+            dots[s.pageIndex - 1].className = 'loading-page-dot done';
+            dots[s.pageIndex - 1].textContent = '✓';
+          }
+          dots[s.pageIndex].className = 'loading-page-dot painting';
+        }
+        stepIndex++;
+      }
+    }, 500);
+  }
+
+  function stopLoadingAnimation() {
+    if (loadingTimer) { clearInterval(loadingTimer); loadingTimer = null; }
+    var bar    = document.getElementById('progress-bar');
+    var stepEl = document.getElementById('loading-step');
+    var etaEl  = document.getElementById('loading-eta');
+    var gridEl = document.getElementById('loading-pages-grid');
+    if (bar) bar.style.width = '100%';
+    if (stepEl) stepEl.textContent = '✨ Your story is ready!';
+    if (etaEl) etaEl.textContent = '';
+    // Mark all dots done
+    if (gridEl) {
+      var dots = gridEl.querySelectorAll('.loading-page-dot');
+      dots.forEach(function(d) { d.className = 'loading-page-dot done'; d.textContent = '✓'; });
+    }
   }
 
   function showError(msg) {
@@ -279,7 +399,7 @@
     var gender = genderEl.value;
     var topic  = topicEl.value.trim();
     var moral  = moralEl.value.trim();
-    var pages  = pagesEl.value;
+    var pages  = parseInt(pagesEl.value) || 8;
 
     document.getElementById('error-box').style.display = 'none';
     document.getElementById('blocked-box').style.display = 'none';
@@ -288,10 +408,9 @@
 
     btn.disabled = true;
     show('loading-screen');
-    setProgress(10, 'Getting ready...');
+    startLoadingAnimation(pages);
 
     try {
-      setProgress(30, 'Once upon a time...');
       var res = await fetch('/api/story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -307,6 +426,7 @@
       var data = await res.json();
 
       if (data.blocked) {
+        stopLoadingAnimation();
         show('form-screen');
         btn.disabled = false;
         showBlocked(data.reason || 'This topic could not be used for a story.');
@@ -317,7 +437,7 @@
         throw new Error('Incomplete story received. Please try again.');
       }
 
-      setProgress(80, 'Turning the pages...');
+      stopLoadingAnimation();
       currentStory = data;
       currentName  = name;
 
@@ -325,12 +445,12 @@
       if (saveBtn) { saveBtn.textContent = '🔖 Save'; saveBtn.classList.remove('saved'); }
 
       renderBook(data, name);
-      setProgress(100, 'Your story is ready ✨');
-      await new Promise(function(r) { setTimeout(r, 400); });
+      await new Promise(function(r) { setTimeout(r, 600); });
       show('book-screen');
       window.scrollTo(0, 0);
 
     } catch(err) {
+      stopLoadingAnimation();
       show('form-screen');
       btn.disabled = false;
       showError('Something went wrong. Please try again.');
@@ -499,8 +619,6 @@
   }
 
   // ── SAVE / LOAD ───────────────────────────────────────────────────────
-  // Images stripped before saving — base64 is too large for localStorage.
-  // Text and prompts are kept. Use Download PDF to keep the full illustrated story.
   function storyWithoutImages(story) {
     if (!story) return story;
     return {
@@ -602,6 +720,7 @@
   }
 
   function goBack() {
+    stopLoadingAnimation();
     show('form-screen');
     var btn = document.querySelector('.generate-btn');
     if (btn) btn.disabled = false;
