@@ -96,6 +96,8 @@ STORY STRUCTURE:
 IMAGE PROMPT RULES — for every page imagePrompt:
 - Start with a SHORT character description tag like: [CHAR: girl, black curly hair, blue eyes, red dress] — invent this once and repeat it identically on every single page
 - Then describe the scene for that page
+- Focus on environment and mood rather than close-up of characters
+- Avoid describing hands, fingers or arms in detail
 - End with the mood/lighting
 - Example: "[CHAR: small brown rabbit, white fluffy tail, yellow scarf] sitting alone under a big oak tree, looking up at falling autumn leaves, soft golden afternoon light"
 - The character tag MUST be identical on every page — same words, same order
@@ -143,20 +145,16 @@ Return ONLY: {"title":"...","characterDescription":"one sentence physical descri
 
   // ── GENERATE ALL IMAGES WITH CLOUDFLARE WORKERS AI ───────────────────────
   if (env.AI) {
-    const IMG_STYLE = "children's picture book illustration, soft pastel colors, warm and gentle, consistent character design, child-safe, no text, no words, no letters";
+    const IMG_STYLE = "watercolor children's book illustration, soft pastel palette, gentle brushstrokes, wide establishing shot, characters shown from distance, cosy and warm atmosphere, no text, no words, no letters";
 
     const generateImage = async (prompt) => {
       try {
-        const response = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', {
+        const response = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
           prompt: prompt,
+          num_steps: 4,
         });
-        // SDXL returns a ReadableStream of raw bytes
-        if (response) {
-          const buffer = response instanceof ReadableStream
-            ? await new Response(response).arrayBuffer()
-            : response;
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-          return 'data:image/png;base64,' + base64;
+        if (response && response.image) {
+          return 'data:image/jpeg;base64,' + response.image;
         }
         return null;
       } catch(err) {
