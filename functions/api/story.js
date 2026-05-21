@@ -143,7 +143,7 @@ Return ONLY: {"title":"...","characterDescription":"one sentence physical descri
 
   // ── GENERATE ALL IMAGES WITH CLOUDFLARE WORKERS AI ───────────────────────
   if (env.AI) {
-    const IMG_STYLE = "watercolor illustration, children's picture book, soft pastel colors, whimsical, warm, gentle brushstrokes, child-safe, no text, no words, no letters";
+    const IMG_STYLE = "flat vector illustration, children's picture book, soft pastel colors, simple clean shapes, minimal detail, no hands visible, wide shot scene, warm and gentle, child-safe, no text, no words, no letters";
 
     const generateImage = async (prompt) => {
       try {
